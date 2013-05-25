@@ -1,0 +1,88 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayoutMain"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    tools:context="com.ibme.android.actopsy.Actopsy" >
+
+    <ScrollView
+        android:id="@+id/scrollViewMain"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:fillViewport="true" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/white"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:id="@+id/linearLayoutActMON"
+                android:layout_width="fill_parent"
+                android:layout_height="75dp"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayoutActTUE"
+                android:layout_width="fill_parent"
+                android:layout_height="75dp"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayoutActWED"
+                android:layout_width="fill_parent"
+                android:layout_height="75dp"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayoutActTHU"
+                android:layout_width="fill_parent"
+                android:layout_height="75dp"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayoutActFRI"
+                android:layout_width="fill_parent"
+                android:layout_height="75dp"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayoutActSAT"
+                android:layout_width="fill_parent"
+                android:layout_height="75dp"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayoutActSUN"
+                android:layout_width="fill_parent"
+                android:layout_height="75dp"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp" >
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

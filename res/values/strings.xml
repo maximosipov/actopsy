@@ -1,0 +1,70 @@
+<resources>
+
+    <string name="app_name">Actopsy</string>
+    <string name="app_id">502685379753466</string>
+    <string name="service_name_collect">ActopsyCollectService</string>
+    <string name="service_name_upload">ActopsyUploadService</string>
+
+    <string name="title_activity_profile">Actopsy</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="menu_main">Profile</string>
+    <string name="menu_settings">Settings</string>
+
+	<string name="pref_study">Study details</string>
+    <string name="pref_personal">Personal details</string>
+    <string name="pref_general">General settings</string>
+
+	<string name="pref_share_name">Share data</string>
+    <string name="pref_share_summary">Help science and upload your activity data to our servers for analysis</string>
+
+	<string name="pref_tcid_name">Your study ID</string>
+    <string name="pref_tcid_summary">You should have know study ID to participate in data collection</string>
+
+	<string name="pref_pass_name">Study password</string>
+    <string name="pref_pass_summary">Please enter the password, associated with this ID</string>
+
+    <string name="pref_usage_title">Phone usage</string>
+    <string name="pref_usage_summary">What is your typical mobile phone usage pattern?</string>
+
+	<string name="pref_bday_name">Birth year</string>
+    <string name="pref_bday_summary">Please provide your birth year</string>
+
+    <string name="pref_gender_title">Gender</string>
+    <string name="pref_gender_summary">Male, female or not specified?</string>
+
+    <string name="pref_occupation_title">Occupation</string>
+    <string name="pref_occupation_summary">What do you do?</string>
+
+    <string name="pref_location_name">Location</string>
+    <string name="pref_location_summary">Specify your primary geographical location</string>
+
+    <color name="white">#ffffffff</color>
+    <color name="black">#ff000000</color>
+    <color name="yellow_dark">#fff0e000</color>
+    <color name="yellow_light">#60f0e000</color>
+    
+    <color name="cambridge_blue">#ffa3c1ad</color>
+    <color name="oxford_blue">#ff002147</color>
+    <color name="oxford_light">#ff003157</color>
+    
+	<color name="text_light">#ff002147</color>
+	<color name="text_dark">#d0002147</color>
+    
+    <color name="list_light">#00002147</color>
+    <color name="list_medium">#10002147</color>
+    <color name="list_dark">#20002147</color>
+    <color name="list_hover_light">#20002147</color>
+    <color name="list_hover_medium">#30002147</color>
+    <color name="list_hover_dark">#40002147</color>
+    <color name="list_divider">#00004167</color>
+
+	<string name="mood_irritable">Irritable</string>
+	<string name="mood_anxious">Anxious</string>
+	<string name="mood_depressed">Depressed</string>
+	<string name="mood_elated">Elated</string>
+	<string name="mood_energised">Energised</string>
+	<string name="mood_bedtime">Bedtime</string>
+	<string name="mood_waketime">Waketime</string>
+
+</resources>

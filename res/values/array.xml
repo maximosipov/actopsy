@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="statusArray">
+        <item>Pre-university</item>
+        <item>Undergraduate student</item>
+        <item>Post-graduate student</item>
+        <item>Post-doctoral researcher</item>
+        <item>Lecturer</item>
+        <item>Professor</item>
+        <item>Other</item>
+    </string-array>
+    <string-array name="statusValues">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+    </string-array>
+
+    <string-array name="genderArray">
+        <item>Female</item>
+        <item>Male</item>
+        <item>Not specified</item>
+    </string-array>
+    <string-array name="genderValues">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="usageArray">
+        <item>Pants pocket</item>
+        <item>Jacket poket</item>
+        <item>Handbag</item>
+    </string-array>
+    <string-array name="usageValues">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+</resources>

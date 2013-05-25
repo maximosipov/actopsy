@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/pref_study" >
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="checkboxShare"
+            android:summary="@string/pref_share_summary"
+            android:title="@string/pref_share_name" />
+
+        <EditTextPreference
+            android:name="@string/pref_tcid_name"
+            android:defaultValue=""
+            android:key="editUserTCID"
+            android:summary="@string/pref_tcid_summary"
+            android:title="@string/pref_tcid_name" />
+
+        <EditTextPreference
+            android:name="@string/pref_pass_name"
+            android:defaultValue=""
+            android:key="editUserPass"
+            android:summary="@string/pref_pass_summary"
+            android:title="@string/pref_pass_name" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_personal" >
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/usageArray"
+            android:entryValues="@array/usageValues"
+            android:key="listMobileUsage"
+            android:summary="@string/pref_usage_summary"
+            android:title="@string/pref_usage_title" />
+
+        <EditTextPreference
+            android:name="@string/pref_bday_name"
+            android:defaultValue="1990"
+            android:key="editUserBday"
+            android:summary="@string/pref_bday_summary"
+            android:title="@string/pref_bday_name" />
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/genderArray"
+            android:entryValues="@array/genderValues"
+            android:key="listUserGender"
+            android:summary="@string/pref_gender_summary"
+            android:title="@string/pref_gender_title" />
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/statusArray"
+            android:entryValues="@array/statusValues"
+            android:key="listUserStatus"
+            android:summary="@string/pref_occupation_summary"
+            android:title="@string/pref_occupation_title" />
+
+        <EditTextPreference
+            android:name="@string/pref_location_name"
+            android:defaultValue="Oxford, Oxfordshire"
+            android:key="editUserLocation"
+            android:summary="@string/pref_location_summary"
+            android:title="@string/pref_location_name" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_general" >
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="checkboxWifi"
+            android:summary="Upload your data only when connected to a Wi-Fi network (not used yet)"
+            android:title="Upload only on Wi-Fi" />
+
+        <EditTextPreference
+            android:name="Local storage (days)"
+            android:defaultValue="10"
+            android:key="editLocalStorage"
+            android:summary="Keep several days of data locally"
+            android:title="Local storage (days)" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

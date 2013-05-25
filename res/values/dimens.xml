@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="chart_margin">20dp</dimen>
+    <dimen name="chart_font_large">16sp</dimen>
+    <dimen name="chart_font_medium">12sp</dimen>
+    <dimen name="chart_font_small">10sp</dimen>
+</resources>
