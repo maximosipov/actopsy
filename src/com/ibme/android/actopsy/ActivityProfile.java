@@ -150,9 +150,9 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 			//				float x, y, z;
 			//				long ts;
 			//				Bundle b = msg.getData();
-			//				x = b.getFloat("ACCX");
-			//				y = b.getFloat("ACCY");
-			//				z = b.getFloat("ACCZ");
+			//				x = b.getFloat("X");
+			//				y = b.getFloat("Y");
+			//				z = b.getFloat("Z");
 			//				ts = b.getLong("TS");
 			//				break;
 			default:

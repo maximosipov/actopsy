@@ -21,17 +21,25 @@ import com.ibme.android.actopsy.R;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.security.KeyStore;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -150,7 +158,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 				File[] files = getFiles();
 				if (files != null) {
 					for (int i = 0; i < files.length; i++) {
-						new UploaderTask().execute(files[i]);
+						new UploaderTask(context).execute(files[i]);
 					}
 				}
 			} else {
@@ -182,12 +190,51 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		}
 	}
 
+	public class MyHttpClient extends DefaultHttpClient {
+
+		final Context context;
+
+		public MyHttpClient(Context context) {
+			this.context = context;
+		}
+
+		@Override
+		protected ClientConnectionManager createClientConnectionManager() {
+			SchemeRegistry registry = new SchemeRegistry();
+			registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+			registry.register(new Scheme("https", newSslSocketFactory(), 443));
+			return new SingleClientConnManager(getParams(), registry);
+		}
+
+		private SSLSocketFactory newSslSocketFactory() {
+			try {
+				KeyStore trusted = KeyStore.getInstance("BKS");
+				InputStream in = context.getResources().openRawResource(R.raw.ibmeweb7);
+				try {
+					trusted.load(in, "ez24get".toCharArray());
+				} finally {
+					in.close();
+				}
+				return new SSLSocketFactory(trusted);
+			} catch (Exception e) {
+				throw new AssertionError(e);
+			}
+		}
+	}
+
 	private class UploaderTask extends AsyncTask<File, Void, Void> {
+
+		final Context context;
+
+		UploaderTask(Context context) {
+			this.context = context;
+		}
+		
 		@Override
 		protected Void doInBackground(File... files) {
 			try {
 				for (int i = 0; i < files.length; i ++) {
-					HttpClient httpclient = new DefaultHttpClient();
+					HttpClient httpclient = new MyHttpClient(context);
 					HttpPost httppost = new HttpPost(ClassConsts.UPLOAD_URL);
 
 					// Prepare HTTP request
@@ -200,11 +247,12 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 					HttpResponse response = httpclient.execute(httppost);
 					HttpEntity rsp = response.getEntity();
 					if (rsp != null) {
-						if (EntityUtils.toString(rsp) == "OK") {
+						String str = EntityUtils.toString(rsp); 
+						if (str == "OK") {
 							files[i].delete();
 							Log.i(TAG, "Upload successful: " + files[i].getName());
 						} else {
-							Log.e(TAG, "Upload failed: " + EntityUtils.toString(rsp));
+							Log.e(TAG, "Upload failed: " + str);
 						}
 					}
 				}
