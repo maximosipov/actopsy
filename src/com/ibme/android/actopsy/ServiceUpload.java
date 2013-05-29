@@ -89,6 +89,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 	private long mDeleteAge; // in milliseconds
 	private String mUserID;
 	private String mUserPass;
+	private boolean mUpload;
 
 	ConnectivityManager mConnectivityManager;
 	ConnectivityReceiver mConnectivityReceiver;
@@ -103,14 +104,15 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		HandlerThread thread = new HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND);
 		thread.start();
 
-		android.os.Debug.waitForDebugger();
+		//android.os.Debug.waitForDebugger();
 		long ts = System.currentTimeMillis();
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		int localStorage = Integer.valueOf(prefs.getString("editLocalStorage", "10")); 
 		mDeleteAge = localStorage*ClassConsts.MILLIDAY;
-		mUserID = prefs.getString("editUserID", "anonymous");
-		mUserPass = prefs.getString("editUserPass", "password");
+		mUserID = prefs.getString("editUserID", "");
+		mUserPass = prefs.getString("editUserPass", "");
+		mUpload = prefs.getBoolean("checkboxShare", false);
 
 		// Prepare for connectivity tracking
 		mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -175,10 +177,14 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			if (activeNetwork != null && activeNetwork.isConnected() && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
 				// can upload
 				Log.d(TAG, "WiFi On");
-				File[] files = getFiles();
-				if (files != null) {
-					for (int i = 0; i < files.length; i++) {
-						new UploaderTask(context).execute(files[i]);
+				if (!mUpload || mUserID == null || mUserPass == null || mUserID.isEmpty() || mUserPass.isEmpty()) {
+					Log.d(TAG, "Upload Off");
+				} else {
+					File[] files = getFiles();
+					if (files != null) {
+						for (int i = 0; i < files.length; i++) {
+							new UploaderTask(context).execute(files[i]);
+						}
 					}
 				}
 			} else {
@@ -335,10 +341,16 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			}
 		} else if (key.equals("editUserID")) {
 			Log.i(TAG, "Changed user ID");
-			mUserID = sharedPreferences.getString("editUserID", "anonymous");
+			mUserID = sharedPreferences.getString("editUserID", "");
+
 		} else if (key.equals("editUserPass")) {
 			Log.i(TAG, "Changed password");
-			mUserPass = sharedPreferences.getString("editUserPass", "password");
+			mUserPass = sharedPreferences.getString("editUserPass", "");
+
+		} else if (key.equals("checkboxShare")) {
+			mUpload = sharedPreferences.getBoolean("checkboxShare", false);
+			Log.i(TAG, "Changed share settings");
 		}
+
 	}
 }
