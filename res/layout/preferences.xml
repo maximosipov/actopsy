@@ -10,11 +10,11 @@
             android:title="@string/pref_share_name" />
 
         <EditTextPreference
-            android:name="@string/pref_tcid_name"
+            android:name="@string/pref_id_name"
             android:defaultValue=""
-            android:key="editUserTCID"
-            android:summary="@string/pref_tcid_summary"
-            android:title="@string/pref_tcid_name" />
+            android:key="editUserID"
+            android:summary="@string/pref_id_summary"
+            android:title="@string/pref_id_name" />
 
         <EditTextPreference
             android:name="@string/pref_pass_name"

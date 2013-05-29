@@ -71,6 +71,8 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 	private static final String TAG = "ActopsyUploadService";
 
 	private long mDeleteAge; // in milliseconds
+	private String mUserID;
+	private String mUserPass;
 
 	ConnectivityManager mConnectivityManager;
 	ConnectivityReceiver mConnectivityReceiver;
@@ -91,6 +93,8 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		int localStorage = Integer.valueOf(prefs.getString("editLocalStorage", "10")); 
 		mDeleteAge = localStorage*ClassConsts.MILLIDAY;
+		mUserID = prefs.getString("editUserID", "anonymous"); 
+		mUserPass = prefs.getString("editUserPass", "password"); 
 
 		// Prepare for connectivity tracking
 		mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -240,6 +244,8 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 					// Prepare HTTP request
 					MultipartEntity entity = new MultipartEntity();
 					entity.addPart( "MAX_FILE_SIZE", new StringBody(ClassConsts.UPLOAD_SIZE));
+					entity.addPart( "USER", new StringBody(mUserID));        	 
+					entity.addPart( "PASS", new StringBody(mUserPass));        	 
 					entity.addPart( "FILE", new FileBody(files[i]));        	 
 					httppost.setEntity( entity );
 
@@ -307,6 +313,12 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 				Log.i(TAG, "Changed delete age from " + mDeleteAge/ClassConsts.MILLIDAY + " to " + localStorage);
 				mDeleteAge = localStorage*ClassConsts.MILLIDAY;
 			}
+		} else if (key.equals("editUserID")) {
+			Log.i(TAG, "Changed user ID");
+			mUserID = sharedPreferences.getString("editUserID", "anonymous"); 
+		} else if (key.equals("editUserPass")) {
+			Log.i(TAG, "Changed password");
+			mUserPass = sharedPreferences.getString("editUserPass", "password"); 
 		}
 	}
 }

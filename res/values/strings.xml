@@ -18,8 +18,8 @@
 	<string name="pref_share_name">Share data</string>
     <string name="pref_share_summary">Help science and upload your activity data to our servers for analysis</string>
 
-	<string name="pref_tcid_name">Your study ID</string>
-    <string name="pref_tcid_summary">You should have know study ID to participate in data collection</string>
+	<string name="pref_id_name">Your study ID</string>
+    <string name="pref_id_summary">You should have know study ID to participate in data collection</string>
 
 	<string name="pref_pass_name">Study password</string>
     <string name="pref_pass_summary">Please enter the password, associated with this ID</string>

@@ -111,7 +111,8 @@ public class ClassAccelerometry {
 		long yesterday = mTsPrev/ClassConsts.MILLIDAY;
 		if (today > yesterday) {
 			fini();
-			new ZipperTask().execute(yesterday);
+			Log.i(TAG, "Day roll-over: " + new SimpleDateFormat("yyyy-MM-dd").format(new Date(mTsPrev)));
+			new ZipperTask().execute(new Date(mTsPrev));
 			init(ts);
 		}
 		if (mWriter != null) {
@@ -131,9 +132,9 @@ public class ClassAccelerometry {
 		mTsPrev = ts;
 	}
 
-	private class ZipperTask extends AsyncTask<Long, Void, Void> {
+	private class ZipperTask extends AsyncTask<Date, Void, Void> {
 		@Override
-		protected Void doInBackground(Long... y) {
+		protected Void doInBackground(Date... y) {
 			try {
 				File root = Environment.getExternalStorageDirectory();
 				if (root.canWrite()) {
@@ -145,9 +146,9 @@ public class ClassAccelerometry {
 					// Compress files
 					if (y.length >= 1) {
 						SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-						File inf = new File(folder, "activity-" + fmt.format(new Date(y[0])) + ".csv");
+						File inf = new File(folder, "activity-" + fmt.format(y[0]) + ".csv");
 						BufferedInputStream ins = new BufferedInputStream(new FileInputStream(inf));
-						File outf = new File(folder, "activity-" + fmt.format(new Date(y[0])) + ".csv.zip");
+						File outf = new File(folder, "activity-" + fmt.format(y[0]) + ".csv.zip");
 						ZipOutputStream outs = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(outf)));
 
 						// Compress data
@@ -162,10 +163,11 @@ public class ClassAccelerometry {
 				        outs.close();
 						// Remove uncompressed
 				        inf.delete();
+						Log.i(TAG, "Created archive: " + outf.getName());
 					}
 				}
 			} catch (Exception e) {
-				Log.e(TAG, "Could not update activity: " + e.getMessage());
+				Log.e(TAG, "Could not create archive: " + e.getMessage());
 				e.printStackTrace();
 			}
 
