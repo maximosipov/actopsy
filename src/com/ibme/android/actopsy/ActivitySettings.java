@@ -89,6 +89,9 @@ public class ActivitySettings extends PreferenceActivity implements OnSharedPref
 
 		pref = findPreference("listUserStatus");
 		pref.setSummary(((ListPreference)pref).getEntry());
+
+		pref = findPreference("listMobileUsage");
+		pref.setSummary(((ListPreference)pref).getEntry());
 	}
 
 	Preference.OnPreferenceChangeListener numberCheckListener = new Preference.OnPreferenceChangeListener() {
@@ -125,7 +128,7 @@ public class ActivitySettings extends PreferenceActivity implements OnSharedPref
 			String local = ((EditTextPreference)pref).getText();
 			pref.setSummary(local + " (10 days recommended, one day takes 10-30MB of external storage)");
 
-		} else if (key.equals("listUserGender") || key.equals("listUserStatus")) {
+		} else if (key.equals("listUserGender") || key.equals("listUserStatus") || key.equals("listMobileUsage")) {
 			pref.setSummary(((ListPreference)pref).getEntry());
 
 		}
