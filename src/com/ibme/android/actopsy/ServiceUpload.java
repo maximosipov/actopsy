@@ -39,8 +39,12 @@ import java.security.KeyStore;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.util.EntityUtils;
@@ -99,7 +103,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		HandlerThread thread = new HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND);
 		thread.start();
 
-		// android.os.Debug.waitForDebugger();
+		android.os.Debug.waitForDebugger();
 		long ts = System.currentTimeMillis();
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -250,7 +254,11 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		protected Void doInBackground(File... files) {
 			try {
 				for (int i = 0; i < files.length; i ++) {
-					HttpClient httpclient = new MyHttpClient(context);
+					CredentialsProvider cp = new BasicCredentialsProvider();
+				    cp.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
+				    		new UsernamePasswordCredentials(mUserID, mUserPass));
+					MyHttpClient httpclient = new MyHttpClient(context);
+				    httpclient.setCredentialsProvider(cp);
 					HttpPost httppost = new HttpPost(ClassConsts.UPLOAD_URL);
 
 					// Prepare HTTP request
@@ -266,7 +274,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 					HttpEntity rsp = response.getEntity();
 					if (rsp != null) {
 						String str = EntityUtils.toString(rsp); 
-						if (str == "OK") {
+						if (str.matches("^OK(?s).*")) {
 							files[i].delete();
 							Log.i(TAG, "Upload successful: " + files[i].getName());
 						} else {
