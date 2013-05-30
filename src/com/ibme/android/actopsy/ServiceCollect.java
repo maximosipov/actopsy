@@ -31,38 +31,21 @@ package com.ibme.android.actopsy;
 
 import com.ibme.android.actopsy.R;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Process;
-import android.os.RemoteException;
-import android.util.Log;
 
 // In order to start the service the application should run from the phone memory 
 public class ServiceCollect extends Service implements SensorEventListener {
@@ -79,8 +62,6 @@ public class ServiceCollect extends Service implements SensorEventListener {
 
 	@Override
 	public void onCreate() {
-		Log.i(TAG, "Create");
-
 		// TODO: Are we actually running in this thread???
 		HandlerThread thread = new HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND);
 		thread.start();
@@ -100,7 +81,7 @@ public class ServiceCollect extends Service implements SensorEventListener {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.i(TAG, "Start");
+		new ClassEvents(TAG, "INFO", "Started");
 		return START_STICKY;
 	}
 
@@ -109,7 +90,7 @@ public class ServiceCollect extends Service implements SensorEventListener {
 		mSensorManager.unregisterListener(this);
 		mAccelerometry.fini();
 		mProfile.fini();
-		Log.i(TAG, "Destroy");
+		new ClassEvents(TAG, "INFO", "Destroyed");
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -123,7 +104,6 @@ public class ServiceCollect extends Service implements SensorEventListener {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		Log.i(TAG, "Bind");
 		return mMessenger.getBinder();
 	}
 
@@ -175,5 +155,6 @@ public class ServiceCollect extends Service implements SensorEventListener {
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		// TODO: What's that?
+		new ClassEvents(TAG, "INFO", "Accuracy changed");
 	}
 }

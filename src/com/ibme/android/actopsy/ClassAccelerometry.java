@@ -37,7 +37,6 @@ import java.util.Date;
 
 import android.content.Context;
 import android.os.Environment;
-import android.util.Log;
 
 public class ClassAccelerometry {
 
@@ -76,10 +75,10 @@ public class ClassAccelerometry {
 				File out = new File(folder, "activity-" + fmt.format(new Date(ts)) + ".csv");
 				mWriter = new BufferedWriter(new FileWriter(out, true));
 			} else {
-				Log.e(TAG, "SD card is not writable");
+				new ClassEvents(TAG, "ERROR", "SD card not writable");
 			}
 		} catch (Exception e) {
-			Log.e(TAG, "Could not open file: " + e.getMessage());
+			new ClassEvents(TAG, "ERROR", "Could not open file");
 		}
 		mTsPrev = ts;
 	}
@@ -92,7 +91,7 @@ public class ClassAccelerometry {
 				mWriter = null;
 			}
 		} catch (Exception e) {
-			Log.e(TAG, "Could not close file: " + e.getMessage());
+			new ClassEvents(TAG, "ERROR", "Could not close file");
 		}
 	}
 
@@ -117,7 +116,7 @@ public class ClassAccelerometry {
 				// TODO: We may not need to flush that often
 				mWriter.flush();
 			} catch(Exception e) {
-				Log.e(TAG, "Could not write to file: " + e.getMessage());
+				new ClassEvents(TAG, "ERROR", "Could not write file");
 			}
 		}
 		mTsPrev = ts;

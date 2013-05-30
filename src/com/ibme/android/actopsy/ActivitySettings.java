@@ -31,45 +31,27 @@ package com.ibme.android.actopsy;
 
 import com.ibme.android.actopsy.R;
 
-import java.util.List;
-import com.ibme.android.actopsy.ActivityProfile.IncomingHandler;
-
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
-import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
-import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class ActivitySettings extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
-	private static final String TAG = "SettingsActivity";
-	private ProgressDialog mProgress;
+	private static final String TAG = "ActopsySettings";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Preference pref;
 		super.onCreate(savedInstanceState);
-		Log.i(TAG, "Started");
 
 		addPreferencesFromResource(R.layout.preferences);
 

@@ -33,29 +33,7 @@ import com.ibme.android.actopsy.R;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.security.KeyStore;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SingleClientConnManager;
-import org.apache.http.util.EntityUtils;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -68,7 +46,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -77,7 +54,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.Process;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 // In order to start the service the application should run from the phone memory.
 // This one wakes up every 24 hours and attempts to upload data (if upload is enabled)
@@ -98,8 +74,6 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 
 	@Override
 	public void onCreate() {
-		Log.i(TAG, "Create");
-
 		// TODO: Are we actually running in this thread???
 		HandlerThread thread = new HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND);
 		thread.start();
@@ -128,7 +102,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, ts + 1000, ClassConsts.UPLOAD_PERIOD, pintent);
 	}
 
-	private File[] getFiles() {
+	private File[] getFiles(final String mask) {
 		File[] names = new File[0];
 		File root = Environment.getExternalStorageDirectory();
 		// TODO: Fix it to check and wait for storage
@@ -136,25 +110,26 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			if (root.canRead()){
 				File folder = new File(root, ClassConsts.FILES_ROOT);
 				if (folder.exists()) {
-					// build list of zip files from sdcard
+					// Build list of zip files from sdcard
 					names = folder.listFiles(new FilenameFilter() {
 						public boolean accept(File dir, String name) {
-							return name.toLowerCase().endsWith(".zip");
+							return name.toLowerCase().matches(mask);
 						}
 					});
 				}
 			} else {
-				Log.e(TAG, "SD card is not readable");
+				new ClassEvents(TAG, "ERROR", "SD card not readable");
 			}
 		} catch (Exception e) {
-			Log.e(TAG, "Could not open file: " + e.getMessage());
+			new ClassEvents(TAG, "ERROR", "Could get files");
 		}
 		return names;
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.i(TAG, "Start");
+		new ClassEvents(TAG, "INFO", "Started");
+
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this); 
 		prefs.registerOnSharedPreferenceChangeListener(this);
 		return START_STICKY;
@@ -166,7 +141,8 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		unregisterReceiver(mAlarmReceiver);
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this); 
 		prefs.unregisterOnSharedPreferenceChangeListener(this);
-		Log.i(TAG, "Destroy");
+
+		new ClassEvents(TAG, "INFO", "Destroyed");
 	}
 
 	// Upload files if connectivity is available
@@ -175,21 +151,21 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		public void onReceive(Context context, Intent intent) {
 			NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
 			if (activeNetwork != null && activeNetwork.isConnected() && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
-				// can upload
-				Log.d(TAG, "WiFi On");
+				new ClassEvents(TAG, "INFO", "WiFi on");
+
 				if (!mUpload || mUserID == null || mUserPass == null || mUserID.isEmpty() || mUserPass.isEmpty()) {
-					Log.d(TAG, "Upload Off");
+					new ClassEvents(TAG, "INFO", "Upload off");
 				} else {
-					File[] files = getFiles();
+					File[] files = getFiles(".*zip$");
 					if (files != null) {
 						for (int i = 0; i < files.length; i++) {
-							new UploaderTask(context).execute(files[i]);
+							new TaskUploader(context).execute(files[i]);
 						}
 					}
 				}
 			} else {
-				// stop uploads
-				Log.d(TAG, "WiFi Off");
+				// TODO: Stop uploads?
+				new ClassEvents(TAG, "INFO", "WiFi off");
 			}
 		}
 	}
@@ -198,8 +174,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 	public class AlarmReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.d(TAG, "Alarm");
-			File[] files = getFiles();
+			File[] files = getFiles(".*");
 			long now = System.currentTimeMillis();
 
 			// Delete old files
@@ -207,93 +182,12 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 				long age = files[i].lastModified();
 				if (age + mDeleteAge < now) {
 					if (files[i].delete()) {
-						Log.i(TAG, "Delete successful: " + files[i].getName());
+						new ClassEvents(TAG, "INFO", "Deleted " + files[i].getName());
 					} else {
-						Log.e(TAG, "Delete failed: " + files[i].getName());
+						new ClassEvents(TAG, "ERROR", "Delete failed " + files[i].getName());
 					}
 				}
 			}
-		}
-	}
-
-	public class MyHttpClient extends DefaultHttpClient {
-
-		final Context context;
-
-		public MyHttpClient(Context context) {
-			this.context = context;
-		}
-
-		@Override
-		protected ClientConnectionManager createClientConnectionManager() {
-			SchemeRegistry registry = new SchemeRegistry();
-			registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-			registry.register(new Scheme("https", newSslSocketFactory(), 443));
-			return new SingleClientConnManager(getParams(), registry);
-		}
-
-		private SSLSocketFactory newSslSocketFactory() {
-			try {
-				KeyStore trusted = KeyStore.getInstance("BKS");
-				InputStream in = context.getResources().openRawResource(R.raw.ibmeweb7);
-				try {
-					trusted.load(in, "ez24get".toCharArray());
-				} finally {
-					in.close();
-				}
-				return new SSLSocketFactory(trusted);
-			} catch (Exception e) {
-				throw new AssertionError(e);
-			}
-		}
-	}
-
-	private class UploaderTask extends AsyncTask<File, Void, Void> {
-
-		final Context context;
-
-		UploaderTask(Context context) {
-			this.context = context;
-		}
-		
-		@Override
-		protected Void doInBackground(File... files) {
-			try {
-				for (int i = 0; i < files.length; i ++) {
-					CredentialsProvider cp = new BasicCredentialsProvider();
-				    cp.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
-				    		new UsernamePasswordCredentials(mUserID, mUserPass));
-					MyHttpClient httpclient = new MyHttpClient(context);
-				    httpclient.setCredentialsProvider(cp);
-					HttpPost httppost = new HttpPost(ClassConsts.UPLOAD_URL);
-
-					// Prepare HTTP request
-					MultipartEntity entity = new MultipartEntity();
-					entity.addPart( "MAX_FILE_SIZE", new StringBody(ClassConsts.UPLOAD_SIZE));
-					entity.addPart( "USER", new StringBody(mUserID));
-					entity.addPart( "PASS", new StringBody(mUserPass));
-					entity.addPart( "FILE", new FileBody(files[i]));        	 
-					httppost.setEntity( entity );
-
-					// Execute HTTP request
-					HttpResponse response = httpclient.execute(httppost);
-					HttpEntity rsp = response.getEntity();
-					if (rsp != null) {
-						String str = EntityUtils.toString(rsp); 
-						if (str.matches("^OK(?s).*")) {
-							files[i].delete();
-							Log.i(TAG, "Upload successful: " + files[i].getName());
-						} else {
-							Log.e(TAG, "Upload failed: " + str);
-						}
-					}
-				}
-			} catch (Exception e) {
-				Log.e(TAG, "Could upload data: " + e.getMessage());
-				e.printStackTrace();
-			}
-
-			return null;
 		}
 	}
 
@@ -308,7 +202,6 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		Log.i(TAG, "Bind");
 		return mMessenger.getBinder();
 	}
 
@@ -336,20 +229,14 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		if (key.equals("editLocalStorage")) {
 			int localStorage = Integer.valueOf(sharedPreferences.getString(key, "10")); 
 			if (localStorage > 0) {
-				Log.i(TAG, "Changed delete age from " + mDeleteAge/ClassConsts.MILLIDAY + " to " + localStorage);
 				mDeleteAge = localStorage*ClassConsts.MILLIDAY;
 			}
 		} else if (key.equals("editUserID")) {
-			Log.i(TAG, "Changed user ID");
 			mUserID = sharedPreferences.getString("editUserID", "");
-
 		} else if (key.equals("editUserPass")) {
-			Log.i(TAG, "Changed password");
 			mUserPass = sharedPreferences.getString("editUserPass", "");
-
 		} else if (key.equals("checkboxShare")) {
 			mUpload = sharedPreferences.getBoolean("checkboxShare", false);
-			Log.i(TAG, "Changed share settings");
 		}
 
 	}

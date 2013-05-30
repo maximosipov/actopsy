@@ -29,26 +29,44 @@
 
 package com.ibme.android.actopsy;
 
-public class ClassConsts {
-	public static final String FILES_ROOT = "/Android/data/com.ibme.android.actopsy/files/";
-	public static final String PREFS_SUMMARY = "profile-summary";
-	public static final String PREFS_STATS = "profile-stats";
-	public static final String DATEFMT = "yyyy-MM-dd HH:mm:ss.SSSZ";
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-	public static final long MILLIDAY = 24*60*60*1000;		// Day in milliseconds
-	public static final long MILLIHOUR = 60*60*1000;
+import android.os.Environment;
+import android.util.Log;
 
-	public static final String[] DAYS = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+public class ClassEvents {
 
-	public static final double G = 9.81;
-	
-	public static final long LOC_TIME = 1*60*1000;			// 1 minute granularity
-	public static final float LOC_DIST = 0;					// don't care about distance
+	private static final String TAG = "ActopsyEvents";
 
-	public static final String UPLOAD_ALARM = "com.ibme.android.actopsy.UploadService.AlarmReceiver";
-	public static final long UPLOAD_PERIOD = 24*60*60*1000L;	// 24 hours
-	public static final String UPLOAD_URL = "https://ibme-web7.eng.ox.ac.uk/upload.php";
-	public static final String UPLOAD_SIZE = "10000000"; // 10MB
-
-	public static final int BUFFER_SIZE = 8192;
+	public ClassEvents(String tag, String type, String str)
+	{
+		try {
+			long ts = System.currentTimeMillis();
+			File root = Environment.getExternalStorageDirectory();
+			if (root.canWrite()){
+				// Create folders
+				File folder = new File(root, ClassConsts.FILES_ROOT);
+				if (!folder.exists()) {
+					folder.mkdirs();
+				}
+				// Initialise events file
+				SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+				File out = new File(folder, "events-" + fmt.format(new Date(ts)) + ".csv");
+				BufferedWriter writer = new BufferedWriter(new FileWriter(out, true));
+				// Write data and close events file 
+				fmt = new SimpleDateFormat(ClassConsts.DATEFMT);
+				Log.d(tag, type + "," +  str + "\n");
+				writer.write(fmt.format(new Date(ts)) + "," + type + "," + str + " (" + tag + ")" + "\n");
+				writer.close();
+			} else {
+				Log.e(TAG, "SD card not writable");
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "Could not write file: " + e.getMessage());
+		}
+	}
 }

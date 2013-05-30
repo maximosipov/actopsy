@@ -36,7 +36,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 
 ///////////////////////////////////////////////////////////////////////////
 // Activity profiles are stored in shared preferences with the following
@@ -211,11 +210,8 @@ public class ClassProfile {
 					editor_s.commit();
 				}
 				editor.commit();
-
-				Log.i(TAG, "Updated profile " + file);
 			} catch (Exception e) {
-				Log.e(TAG, "Could not update profile: " + e.getMessage());
-				e.printStackTrace();
+				new ClassEvents(TAG, "ERROR", "Could not update profile");
 			}
 
 			return null;

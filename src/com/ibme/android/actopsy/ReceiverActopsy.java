@@ -32,12 +32,8 @@ package com.ibme.android.actopsy;
 import com.ibme.android.actopsy.R;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 public class ReceiverActopsy extends BroadcastReceiver {
 
@@ -45,26 +41,16 @@ public class ReceiverActopsy extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		Intent service;
-		ComponentName comp;
+
+		new ClassEvents(TAG, "INFO", "Started");
 
 		// data collection service
 		service = new Intent(context, ServiceCollect.class);
-		comp = context.startService(service);
-		if (comp == null) {
-			Log.e(TAG, "Could not start service " + comp.toString());
-		} else {
-			Log.i(TAG, "Started service");   
-		}
+		context.startService(service);
 
 		// data upload and housekeeping service
 		service = new Intent(context, ServiceUpload.class);
-		comp = context.startService(service);
-		if (comp == null){
-			Log.e(TAG, "Could not start service " + comp.toString());
-		} else {
-			Log.i(TAG, "Started service");   
-		}
+		context.startService(service);
 	}
 }

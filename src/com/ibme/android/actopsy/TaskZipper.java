@@ -31,33 +31,14 @@ package com.ibme.android.actopsy;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
-import java.io.LineNumberReader;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Scanner;
 import java.util.zip.ZipEntry; 
 import java.util.zip.ZipOutputStream; 
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 
 public class TaskZipper extends AsyncTask<String, Void, Void> {
 
@@ -92,14 +73,12 @@ public class TaskZipper extends AsyncTask<String, Void, Void> {
 					outs.close();
 					// Remove uncompressed
 					inf.delete();
-					Log.i(TAG, "Created archive " + outf.getName());
+					new ClassEvents(TAG, "INFO", "Zipped " + outf.getName());
 				}
 			}
 		} catch (Exception e) {
-			Log.e(TAG, "Could not create archive " + e.getMessage());
-			e.printStackTrace();
+			new ClassEvents(TAG, "ERROR", "Zipper failed");
 		}
-
 		return null;
 	}
 }

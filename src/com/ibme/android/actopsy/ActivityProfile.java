@@ -31,20 +31,12 @@ package com.ibme.android.actopsy;
 
 import com.ibme.android.actopsy.R;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.LayoutParams;
 import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.internal.widget.IcsAdapterView;
-import com.actionbarsherlock.internal.widget.IcsAdapterView.OnItemSelectedListener;
-import com.actionbarsherlock.internal.widget.IcsLinearLayout;
-import com.actionbarsherlock.internal.widget.IcsSpinner;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
@@ -60,7 +52,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -68,13 +59,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Color;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 public class ActivityProfile extends SherlockActivity implements OnSharedPreferenceChangeListener {
 
@@ -83,7 +68,6 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i(TAG, "Started");
 		setContentView(R.layout.profile);
 
 		// Initialize preferences
@@ -138,14 +122,6 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		// TODO: This option actually doesn't exist now, maybe remove?
-		if (key.equals("checkboxService")) {
-			if (sharedPreferences.getBoolean(key, true)) {
-				doBindService();
-			} else {
-				doUnbindService();
-			}
-		}
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -183,7 +159,7 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 				msg.replyTo = mMessenger;
 				mService.send(msg);
 			} catch (RemoteException e) {
-				Log.i(TAG, "Register client failed");
+				new ClassEvents(TAG, "ERROR", "Register client failed");
 			}
 		}
 
@@ -195,7 +171,6 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 	void doBindService() {
 		bindService(new Intent(ActivityProfile.this, ServiceCollect.class), mConnection, Context.BIND_AUTO_CREATE);
 		mBound = true;
-		Log.i(TAG, "Bind");
 	}
 
 	void doUnbindService() {
@@ -206,7 +181,7 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 					msg.replyTo = mMessenger;
 					mService.send(msg);
 				} catch (RemoteException e) {
-					Log.i(TAG, "Unregister client failed");
+					new ClassEvents(TAG, "ERROR", "Un-register client failed");
 				}
 			}
 
