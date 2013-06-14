@@ -50,6 +50,7 @@ public class ClassAccelerometry {
 	}
 
 	private Context mContext;
+	private File mFile;
 	private BufferedWriter mWriter;
 	private long mTsPrev;
 
@@ -72,8 +73,8 @@ public class ClassAccelerometry {
 				}
 				// Initialise the main activity file
 				SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-				File out = new File(folder, "activity-" + fmt.format(new Date(ts)) + ".csv");
-				mWriter = new BufferedWriter(new FileWriter(out, true));
+				mFile = new File(folder, "activity-" + fmt.format(new Date(ts)) + ".csv");
+				mWriter = new BufferedWriter(new FileWriter(mFile, true));
 			} else {
 				new ClassEvents(TAG, "ERROR", "SD card not writable");
 			}
@@ -90,6 +91,9 @@ public class ClassAccelerometry {
 				mWriter.close();
 				mWriter = null;
 			}
+			if (mFile != null) {
+				mFile = null;
+			}
 		} catch (Exception e) {
 			new ClassEvents(TAG, "ERROR", "Could not close file " + e.getMessage());
 		}
@@ -100,8 +104,8 @@ public class ClassAccelerometry {
 		long today = ts/ClassConsts.MILLIDAY;
 		long yesterday = mTsPrev/ClassConsts.MILLIDAY;
 		if (today > yesterday) {
+			String f = mFile.getName();
 			fini();
-			String f = "activity-" + new SimpleDateFormat("yyyy-MM-dd").format(new Date(mTsPrev)) + ".csv";
 			new TaskZipper().execute(f);
 			init(ts);
 		}

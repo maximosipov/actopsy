@@ -143,7 +143,8 @@ public class ServiceCollect extends Service implements SensorEventListener {
 	///////////////////////////////////////////////////////////////////////////
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		long ts = event.timestamp;
+		// event.timestamp has a different meaning on different android versions
+		long ts = System.currentTimeMillis();
 		float x = event.values[0];
 		float y = event.values[1];
 		float z = event.values[2];
