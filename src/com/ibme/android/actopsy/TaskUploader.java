@@ -140,7 +140,7 @@ public class TaskUploader extends AsyncTask<File, Void, Void> {
 				}
 			}
 		} catch (Exception e) {
-			new ClassEvents(TAG, "ERROR", "Upload failed");
+			new ClassEvents(TAG, "ERROR", "Upload failed " + e.getMessage());
 		}
 
 		return null;

@@ -211,7 +211,7 @@ public class ClassProfile {
 				}
 				editor.commit();
 			} catch (Exception e) {
-				new ClassEvents(TAG, "ERROR", "Could not update profile");
+				new ClassEvents(TAG, "ERROR", "Could not update profile " + e.getMessage());
 			}
 
 			return null;

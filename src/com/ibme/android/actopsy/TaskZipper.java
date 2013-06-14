@@ -77,7 +77,7 @@ public class TaskZipper extends AsyncTask<String, Void, Void> {
 				}
 			}
 		} catch (Exception e) {
-			new ClassEvents(TAG, "ERROR", "Zipper failed");
+			new ClassEvents(TAG, "ERROR", "Zipper failed " + e.getMessage());
 		}
 		return null;
 	}

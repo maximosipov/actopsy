@@ -78,7 +78,7 @@ public class ClassAccelerometry {
 				new ClassEvents(TAG, "ERROR", "SD card not writable");
 			}
 		} catch (Exception e) {
-			new ClassEvents(TAG, "ERROR", "Could not open file");
+			new ClassEvents(TAG, "ERROR", "Could not open file " + e.getMessage());
 		}
 		mTsPrev = ts;
 	}
@@ -91,7 +91,7 @@ public class ClassAccelerometry {
 				mWriter = null;
 			}
 		} catch (Exception e) {
-			new ClassEvents(TAG, "ERROR", "Could not close file");
+			new ClassEvents(TAG, "ERROR", "Could not close file " + e.getMessage());
 		}
 	}
 
@@ -116,7 +116,7 @@ public class ClassAccelerometry {
 				// TODO: We may not need to flush that often
 				mWriter.flush();
 			} catch(Exception e) {
-				new ClassEvents(TAG, "ERROR", "Could not write file");
+				new ClassEvents(TAG, "ERROR", "Could not write file " + e.getMessage());
 			}
 		}
 		mTsPrev = ts;

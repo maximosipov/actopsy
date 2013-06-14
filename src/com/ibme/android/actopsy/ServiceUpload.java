@@ -54,6 +54,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.Process;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 // In order to start the service the application should run from the phone memory.
 // This one wakes up every 24 hours and attempts to upload data (if upload is enabled)
@@ -121,7 +122,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 				new ClassEvents(TAG, "ERROR", "SD card not readable");
 			}
 		} catch (Exception e) {
-			new ClassEvents(TAG, "ERROR", "Could get files");
+			new ClassEvents(TAG, "ERROR", "Could get files " + e.getMessage());
 		}
 		return names;
 	}
@@ -153,7 +154,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			if (activeNetwork != null && activeNetwork.isConnected() && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
 				new ClassEvents(TAG, "INFO", "WiFi on");
 
-				if (!mUpload || mUserID == null || mUserPass == null || mUserID.isEmpty() || mUserPass.isEmpty()) {
+				if (!mUpload || TextUtils.isEmpty(mUserID) || TextUtils.isEmpty(mUserPass)) {
 					new ClassEvents(TAG, "INFO", "Upload off");
 				} else {
 					File[] files = getFiles(".*zip$");

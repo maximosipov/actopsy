@@ -159,7 +159,7 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 				msg.replyTo = mMessenger;
 				mService.send(msg);
 			} catch (RemoteException e) {
-				new ClassEvents(TAG, "ERROR", "Register client failed");
+				new ClassEvents(TAG, "ERROR", "Register client failed " + e.getMessage());
 			}
 		}
 
@@ -181,7 +181,7 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 					msg.replyTo = mMessenger;
 					mService.send(msg);
 				} catch (RemoteException e) {
-					new ClassEvents(TAG, "ERROR", "Un-register client failed");
+					new ClassEvents(TAG, "ERROR", "Un-register client failed " + e.getMessage());
 				}
 			}
 
