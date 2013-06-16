@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ibme.android.actopsy"
     android:background="@color/oxford_blue"
-    android:versionCode="4"
-    android:versionName="30-May-2013" >
+    android:versionCode="5"
+    android:versionName="15-Jun-2013" >
 
     <uses-sdk
         android:minSdkVersion="7"
