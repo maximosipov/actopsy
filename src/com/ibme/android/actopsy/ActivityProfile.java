@@ -91,15 +91,14 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.menu_profile:
+		int itemId = item.getItemId();
+		if (itemId == R.id.menu_profile) {
 			return super.onOptionsItemSelected(item);
-		case R.id.menu_settings:
+		} else if (itemId == R.id.menu_settings) {
 			Intent settingsActivity = new Intent(getBaseContext(), ActivitySettings.class);
 			startActivity(settingsActivity);
 			return true;
-		default:
+		} else {
 			return super.onOptionsItemSelected(item);
 		}
 	}

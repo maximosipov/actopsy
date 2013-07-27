@@ -136,15 +136,14 @@ public class ActivitySettings extends PreferenceActivity implements OnSharedPref
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.menu_profile:
+		int itemId = item.getItemId();
+		if (itemId == R.id.menu_profile) {
 			Intent mainActivity = new Intent(getBaseContext(), ActivityProfile.class);
 			startActivity(mainActivity);
 			return true;
-		case R.id.menu_settings:
+		} else if (itemId == R.id.menu_settings) {
 			return super.onOptionsItemSelected(item);
-		default:
+		} else {
 			return super.onOptionsItemSelected(item);
 		}
 	}
