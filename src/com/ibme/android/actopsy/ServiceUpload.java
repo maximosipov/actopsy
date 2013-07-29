@@ -175,10 +175,11 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 	public class AlarmReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			File[] files = getFiles(".*");
+			File[] files;
 			long now = System.currentTimeMillis();
 
 			// Delete old files
+			files = getFiles(".*");
 			for (int i = 0; i < files.length; i ++) {
 				long age = files[i].lastModified();
 				if (age + mDeleteAge < now) {
@@ -187,6 +188,15 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 					} else {
 						new ClassEvents(TAG, "ERROR", "Delete failed " + files[i].getName());
 					}
+				}
+			}
+
+			// Archive files older then 2 days 
+			files = getFiles(".*csv$");
+			for (int i = 0; i < files.length; i ++) {
+				long age = files[i].lastModified();
+				if (age + 2*ClassConsts.MILLIDAY < now) {
+					new TaskZipper().execute(files[i].getName());
 				}
 			}
 		}
