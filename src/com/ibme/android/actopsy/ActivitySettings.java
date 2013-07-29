@@ -108,7 +108,7 @@ public class ActivitySettings extends PreferenceActivity implements OnSharedPref
 
 		} else if (key.equals("editLocalStorage")) {
 			String local = ((EditTextPreference)pref).getText();
-			pref.setSummary(local + " (10 days recommended, one day takes 10-30MB of external storage)");
+			pref.setSummary(local + " (15 days recommended, one day takes 1-5MB of external storage)");
 
 		} else if (key.equals("listUserGender") || key.equals("listUserStatus") || key.equals("listMobileUsage")) {
 			pref.setSummary(((ListPreference)pref).getEntry());

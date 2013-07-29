@@ -75,7 +75,7 @@
 
         <EditTextPreference
             android:name="Local storage (days)"
-            android:defaultValue="10"
+            android:defaultValue="15"
             android:key="editLocalStorage"
             android:summary="Keep several days of data locally"
             android:title="Local storage (days)" />
