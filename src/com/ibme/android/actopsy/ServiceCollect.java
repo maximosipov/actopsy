@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -46,9 +48,11 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Process;
+import android.preference.ListPreference;
+import android.preference.PreferenceManager;
 
 // In order to start the service the application should run from the phone memory 
-public class ServiceCollect extends Service implements SensorEventListener {
+public class ServiceCollect extends Service implements SensorEventListener, OnSharedPreferenceChangeListener {
 
 	// TODO: Make it a foreground service
 
@@ -68,6 +72,11 @@ public class ServiceCollect extends Service implements SensorEventListener {
 
 		// android.os.Debug.waitForDebugger();
 
+		// Values should match android definitions
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		int sdelay = Integer.valueOf(prefs.getString("listSamplingRate", "3"));
+		new ClassEvents(TAG, "INFO", "Sampling rate " + sdelay);
+
 		long ts = System.currentTimeMillis();
 		mAccelerometry = new ClassAccelerometry(this);
 		mAccelerometry.init(ts);
@@ -76,12 +85,15 @@ public class ServiceCollect extends Service implements SensorEventListener {
 
 		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+		mSensorManager.registerListener(this, mAccelerometer, sdelay);
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		new ClassEvents(TAG, "INFO", "Started");
+
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		prefs.registerOnSharedPreferenceChangeListener(this);
 		return START_STICKY;
 	}
 
@@ -90,6 +102,9 @@ public class ServiceCollect extends Service implements SensorEventListener {
 		mSensorManager.unregisterListener(this);
 		mAccelerometry.fini();
 		mProfile.fini();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		prefs.unregisterOnSharedPreferenceChangeListener(this);
+
 		new ClassEvents(TAG, "INFO", "Destroyed");
 	}
 
@@ -157,5 +172,17 @@ public class ServiceCollect extends Service implements SensorEventListener {
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		// TODO: What's that?
 		new ClassEvents(TAG, "INFO", "Accuracy changed");
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+		if (key.equals("listSamplingRate")) {
+			String sdelay = prefs.getString(key, "3");
+			new ClassEvents(TAG, "INFO", "Sampling rate " + sdelay);
+			mSensorManager.unregisterListener(this);
+			mSensorManager.registerListener(this, mAccelerometer, Integer.valueOf(sdelay));
+		} else {
+			new ClassEvents(TAG, "INFO", key);
+		}
 	}
 }

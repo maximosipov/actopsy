@@ -58,7 +58,7 @@ public class ActivitySettings extends PreferenceActivity implements OnSharedPref
 		pref = findPreference("editLocalStorage");
 		pref.setOnPreferenceChangeListener(numberCheckListener);
 		String local = ((EditTextPreference)pref).getText();
-		pref.setSummary(local + " (10 days recommended, one day takes 10-30MB of external storage)");
+		pref.setSummary(local + " (15 days recommended, one day takes 1-5MB of external storage)");
 
 		pref = findPreference("editUserBday");
 		pref.setSummary(((EditTextPreference)pref).getText());
@@ -74,6 +74,11 @@ public class ActivitySettings extends PreferenceActivity implements OnSharedPref
 
 		pref = findPreference("listMobileUsage");
 		pref.setSummary(((ListPreference)pref).getEntry());
+
+		// may increase data amount by 20x, so disable it for now
+		pref = findPreference("listSamplingRate");
+		pref.setSummary(((ListPreference)pref).getEntry());
+		pref.setEnabled(false);
 	}
 
 	Preference.OnPreferenceChangeListener numberCheckListener = new Preference.OnPreferenceChangeListener() {
@@ -110,7 +115,10 @@ public class ActivitySettings extends PreferenceActivity implements OnSharedPref
 			String local = ((EditTextPreference)pref).getText();
 			pref.setSummary(local + " (15 days recommended, one day takes 1-5MB of external storage)");
 
-		} else if (key.equals("listUserGender") || key.equals("listUserStatus") || key.equals("listMobileUsage")) {
+		} else if (key.equals("listUserGender") ||
+				key.equals("listUserStatus") ||
+				key.equals("listMobileUsage") ||
+				key.equals("listSamplingRate")) {
 			pref.setSummary(((ListPreference)pref).getEntry());
 
 		}

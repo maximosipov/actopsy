@@ -9,6 +9,14 @@
             android:summary="@string/pref_share_summary"
             android:title="@string/pref_share_name" />
 
+        <ListPreference
+            android:defaultValue="3"
+            android:entries="@array/samplingArray"
+            android:entryValues="@array/samplingValues"
+            android:key="listSamplingRate"
+            android:summary="@string/pref_sampling_summary"
+            android:title="@string/pref_sampling_title" />
+
         <EditTextPreference
             android:name="@string/pref_id_name"
             android:defaultValue=""

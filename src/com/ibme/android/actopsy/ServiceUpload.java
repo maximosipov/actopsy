@@ -159,9 +159,9 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 				// Upload allowed, enabled and configured
 				if (mUpload && !mUploadDisabled && !TextUtils.isEmpty(mUserID) && !TextUtils.isEmpty(mUserPass)) {
 					new ClassEvents(TAG, "INFO", "Upload on");
-					// We receive multiple identical CONNECTIVITY_CHANGE events and this leads to multiple upload
-					// attempts where only one is successful and others waste traffic. Temporary (for one hour)
-					// disabling uploads helps to prevent it.
+					// We receive multiple identical CONNECTIVITY_CHANGE events and this leads
+					// to multiple upload attempts where only one is successful and others waste
+					// traffic. Temporary (for one hour) disabling uploads helps to prevent it.
 					mUploadDisabled = true;
 					File[] files = getFiles(".*zip$");
 					if (files != null) {
@@ -260,6 +260,5 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		} else if (key.equals("checkboxShare")) {
 			mUpload = sharedPreferences.getBoolean("checkboxShare", false);
 		}
-
 	}
 }

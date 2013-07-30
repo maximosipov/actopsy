@@ -42,4 +42,17 @@
         <item>3</item>
     </string-array>
 
+    <string-array name="samplingArray">
+        <item>SENSOR_DELAY_FASTEST</item>
+        <item>SENSOR_DELAY_GAME</item>
+        <item>SENSOR_DELAY_UI</item>
+        <item>SENSOR_DELAY_NORMAL</item>
+	</string-array>
+    <string-array name="samplingValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
 </resources>
