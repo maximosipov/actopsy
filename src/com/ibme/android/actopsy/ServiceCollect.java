@@ -59,9 +59,11 @@ public class ServiceCollect extends Service implements SensorEventListener, OnSh
 	private static final String TAG = "ActopsyCollectService";
 
 	private SensorManager mSensorManager;
-	private Sensor mAccelerometer;
+	private Sensor mSensorAccelerometer;
+	private Sensor mSensorLight;
 
 	private ClassAccelerometry mAccelerometry;
+	private ClassLight mLight;
 	private ClassProfile mProfile;
 
 	@Override
@@ -80,12 +82,16 @@ public class ServiceCollect extends Service implements SensorEventListener, OnSh
 		long ts = System.currentTimeMillis();
 		mAccelerometry = new ClassAccelerometry(this);
 		mAccelerometry.init(ts);
+		mLight = new ClassLight(this);
+		mLight.init(ts);
 		mProfile = new ClassProfile(this);
 		mProfile.init(ts);
 
 		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-		mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		mSensorManager.registerListener(this, mAccelerometer, sdelay);
+		mSensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+		mSensorManager.registerListener(this, mSensorAccelerometer, sdelay);
+		mSensorManager.registerListener(this, mSensorLight, sdelay);
 	}
 
 	@Override
@@ -99,6 +105,7 @@ public class ServiceCollect extends Service implements SensorEventListener, OnSh
 
 	@Override
 	public void onDestroy() {
+		mSensorManager.unregisterListener(this);
 		mSensorManager.unregisterListener(this);
 		mAccelerometry.fini();
 		mProfile.fini();
@@ -160,12 +167,18 @@ public class ServiceCollect extends Service implements SensorEventListener, OnSh
 	public void onSensorChanged(SensorEvent event) {
 		// event.timestamp has a different meaning on different android versions
 		long ts = System.currentTimeMillis();
-		float x = event.values[0];
-		float y = event.values[1];
-		float z = event.values[2];
 
-		mAccelerometry.update(ts, x, y, z);
-		mProfile.update(ts, x, y, z);
+		int type = event.sensor.getType();
+		if (type == Sensor.TYPE_ACCELEROMETER) {
+			float x = event.values[0];
+			float y = event.values[1];
+			float z = event.values[2];
+			mAccelerometry.update(ts, x, y, z);
+			mProfile.update(ts, x, y, z);
+		} else if (type == Sensor.TYPE_LIGHT) {
+			float lux = event.values[0];
+			mLight.update(ts, lux);
+		}
 	}
 
 	@Override
@@ -180,7 +193,9 @@ public class ServiceCollect extends Service implements SensorEventListener, OnSh
 			String sdelay = prefs.getString(key, "3");
 			new ClassEvents(TAG, "INFO", "Sampling rate " + sdelay);
 			mSensorManager.unregisterListener(this);
-			mSensorManager.registerListener(this, mAccelerometer, Integer.valueOf(sdelay));
+			mSensorManager.unregisterListener(this);
+			mSensorManager.registerListener(this, mSensorAccelerometer, Integer.valueOf(sdelay));
+			mSensorManager.registerListener(this, mSensorLight, Integer.valueOf(sdelay));
 		} else {
 			new ClassEvents(TAG, "INFO", key);
 		}
