@@ -67,6 +67,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 	private String mUserID;
 	private String mUserPass;
 	private boolean mUpload;
+	private boolean mUploadDisabled;
 
 	ConnectivityManager mConnectivityManager;
 	ConnectivityReceiver mConnectivityReceiver;
@@ -88,6 +89,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		mUserID = prefs.getString("editUserID", "");
 		mUserPass = prefs.getString("editUserPass", "");
 		mUpload = prefs.getBoolean("checkboxShare", false);
+		mUploadDisabled = false;
 
 		// Prepare for connectivity tracking
 		mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -150,19 +152,25 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 	public class ConnectivityReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
-			if (activeNetwork != null && activeNetwork.isConnected() && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
+			NetworkInfo ni = mConnectivityManager.getActiveNetworkInfo();
+			if (ni != null && ni.isConnected() && ni.getType() == ConnectivityManager.TYPE_WIFI) {
 				new ClassEvents(TAG, "INFO", "WiFi on");
 
-				if (!mUpload || TextUtils.isEmpty(mUserID) || TextUtils.isEmpty(mUserPass)) {
-					new ClassEvents(TAG, "INFO", "Upload off");
-				} else {
+				// Upload allowed, enabled and configured
+				if (mUpload && !mUploadDisabled && !TextUtils.isEmpty(mUserID) && !TextUtils.isEmpty(mUserPass)) {
+					new ClassEvents(TAG, "INFO", "Upload on");
+					// We receive multiple identical CONNECTIVITY_CHANGE events and this leads to multiple upload
+					// attempts where only one is successful and others waste traffic. Temporary (for one hour)
+					// disabling uploads helps to prevent it.
+					mUploadDisabled = true;
 					File[] files = getFiles(".*zip$");
 					if (files != null) {
 						for (int i = 0; i < files.length; i++) {
 							new TaskUploader(context).execute(files[i]);
 						}
 					}
+				} else {
+					new ClassEvents(TAG, "INFO", "Upload off");
 				}
 			} else {
 				// TODO: Stop uploads?
@@ -199,6 +207,9 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 					new TaskZipper().execute(files[i].getName());
 				}
 			}
+
+			// Re-enable upload
+			mUploadDisabled = false;
 		}
 	}
 
