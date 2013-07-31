@@ -42,6 +42,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -52,7 +56,8 @@ import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 
 // In order to start the service the application should run from the phone memory 
-public class ServiceCollect extends Service implements SensorEventListener, OnSharedPreferenceChangeListener {
+public class ServiceCollect extends Service implements
+	SensorEventListener, LocationListener, OnSharedPreferenceChangeListener {
 
 	// TODO: Make it a foreground service
 
@@ -61,9 +66,11 @@ public class ServiceCollect extends Service implements SensorEventListener, OnSh
 	private SensorManager mSensorManager;
 	private Sensor mSensorAccelerometer;
 	private Sensor mSensorLight;
+	private LocationManager mLocationManager;
 
 	private ClassAccelerometry mAccelerometry;
 	private ClassLight mLight;
+	private ClassLocation mLocation;
 	private ClassProfile mProfile;
 
 	@Override
@@ -78,6 +85,7 @@ public class ServiceCollect extends Service implements SensorEventListener, OnSh
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		int sdelay = Integer.valueOf(prefs.getString("listSamplingRate", "3"));
 		new ClassEvents(TAG, "INFO", "Sampling rate " + sdelay);
+		boolean loc = prefs.getBoolean("checkboxLocation", false);
 
 		long ts = System.currentTimeMillis();
 		mAccelerometry = new ClassAccelerometry(this);
@@ -92,6 +100,13 @@ public class ServiceCollect extends Service implements SensorEventListener, OnSh
 		mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 		mSensorManager.registerListener(this, mSensorAccelerometer, sdelay);
 		mSensorManager.registerListener(this, mSensorLight, sdelay);
+
+		mLocation = new ClassLocation(this);
+		mLocation.init(ts);
+		if (loc) {
+			mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+		}
 	}
 
 	@Override
@@ -105,8 +120,13 @@ public class ServiceCollect extends Service implements SensorEventListener, OnSh
 
 	@Override
 	public void onDestroy() {
+		if (mLocationManager != null) {
+			mLocationManager.removeUpdates(this);
+		}
+		mLocation.fini();
 		mSensorManager.unregisterListener(this);
 		mSensorManager.unregisterListener(this);
+		mLight.fini();
 		mAccelerometry.fini();
 		mProfile.fini();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -196,8 +216,42 @@ public class ServiceCollect extends Service implements SensorEventListener, OnSh
 			mSensorManager.unregisterListener(this);
 			mSensorManager.registerListener(this, mSensorAccelerometer, Integer.valueOf(sdelay));
 			mSensorManager.registerListener(this, mSensorLight, Integer.valueOf(sdelay));
-		} else {
-			new ClassEvents(TAG, "INFO", key);
+		} else if (key.equals("checkboxLocation")) {
+			boolean loc = prefs.getBoolean("checkboxLocation", false);
+			if (loc) {
+				mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+				mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+			} else {
+				if (mLocationManager != null) {
+					mLocationManager.removeUpdates(this);
+					mLocation.fini();
+				}
+			}
 		}
+	}
+
+	@Override
+	public void onLocationChanged(Location loc) {
+		long ts = loc.getTime();
+		double lat = loc.getLatitude();
+		double lon = loc.getLongitude();
+		if (mLocation != null) {
+			mLocation.update(ts, lat, lon);
+		}
+	}
+
+	@Override
+	public void onProviderDisabled(String arg0) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
 	}
 }

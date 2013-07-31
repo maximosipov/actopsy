@@ -21,7 +21,10 @@
     <string name="pref_sampling_title">Sampling rate</string>
     <string name="pref_sampling_summary">SENSOR_DELAY_NORMAL</string>
 
-	<string name="pref_id_name">Your study ID</string>
+    <string name="pref_loc_title">Location</string>
+    <string name="pref_loc_summary">Collect relative location with origin at the app installation point</string>
+
+    <string name="pref_id_name">Your study ID</string>
     <string name="pref_id_summary">You should have know study ID to participate in data collection</string>
 
 	<string name="pref_pass_name">Study password</string>
