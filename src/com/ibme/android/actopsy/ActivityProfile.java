@@ -45,13 +45,16 @@ import org.achartengine.model.XYMultipleSeriesDataset;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -65,8 +68,15 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 
 	private static final String TAG = "Actopsy";
 
+//	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+//		if (BuildConfig.DEBUG) {
+//			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+//	                 .detectAll()
+//	                 .penaltyLog()
+//	                 .build());
+//		}
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.profile);
 

@@ -80,7 +80,8 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		HandlerThread thread = new HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND);
 		thread.start();
 
-		//android.os.Debug.waitForDebugger();
+		// android.os.Debug.waitForDebugger();
+
 		long ts = System.currentTimeMillis();
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);

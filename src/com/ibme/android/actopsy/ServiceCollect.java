@@ -71,6 +71,7 @@ public class ServiceCollect extends Service implements
 	private ClassAccelerometry mAccelerometry;
 	private ClassLight mLight;
 	private ClassLocation mLocation;
+	private ClassCallsTexts mCallsTexts;
 	private ClassProfile mProfile;
 
 	@Override
@@ -86,6 +87,7 @@ public class ServiceCollect extends Service implements
 		int sdelay = Integer.valueOf(prefs.getString("listSamplingRate", "3"));
 		new ClassEvents(TAG, "INFO", "Sampling rate " + sdelay);
 		boolean loc = prefs.getBoolean("checkboxLocation", false);
+		boolean comm = prefs.getBoolean("checkboxComm", false);
 
 		long ts = System.currentTimeMillis();
 		mAccelerometry = new ClassAccelerometry(this);
@@ -101,11 +103,16 @@ public class ServiceCollect extends Service implements
 		mSensorManager.registerListener(this, mSensorAccelerometer, sdelay);
 		mSensorManager.registerListener(this, mSensorLight, sdelay);
 
-		mLocation = new ClassLocation(this);
-		mLocation.init(ts);
 		if (loc) {
+			mLocation = new ClassLocation(this);
+			mLocation.init(ts);
 			mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+		}
+
+		if (comm) {
+			mCallsTexts = new ClassCallsTexts(this);
+			mCallsTexts.init(ts);
 		}
 	}
 
@@ -120,10 +127,15 @@ public class ServiceCollect extends Service implements
 
 	@Override
 	public void onDestroy() {
+		if (mCallsTexts != null) {
+			mCallsTexts.fini();
+		}
 		if (mLocationManager != null) {
 			mLocationManager.removeUpdates(this);
 		}
-		mLocation.fini();
+		if (mLocation != null) {
+			mLocation.fini();
+		}
 		mSensorManager.unregisterListener(this);
 		mSensorManager.unregisterListener(this);
 		mLight.fini();
@@ -219,12 +231,28 @@ public class ServiceCollect extends Service implements
 		} else if (key.equals("checkboxLocation")) {
 			boolean loc = prefs.getBoolean("checkboxLocation", false);
 			if (loc) {
+				long ts = System.currentTimeMillis();
+				mLocation = new ClassLocation(this);
+				mLocation.init(ts);
 				mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 				mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
 			} else {
 				if (mLocationManager != null) {
 					mLocationManager.removeUpdates(this);
+				}
+				if (mLocation != null) {
 					mLocation.fini();
+				}
+			}
+		} else if (key.equals("checkboxComm")) {
+			boolean loc = prefs.getBoolean("checkboxComm", false);
+			if (loc) {
+				long ts = System.currentTimeMillis();
+				mCallsTexts = new ClassCallsTexts(this);
+				mCallsTexts.init(ts);
+			} else {
+				if (mCallsTexts != null) {
+					mCallsTexts.fini();
 				}
 			}
 		}

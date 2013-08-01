@@ -45,11 +45,6 @@ public class ClassLocation {
 
 	private static final String TAG = "ActopsyLocation";
 
-	public class Values {
-		long ts;
-		float lux;
-	}
-
 	private Context mContext;
 	private File mFile;
 	private BufferedWriter mWriter;

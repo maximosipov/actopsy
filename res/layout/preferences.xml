@@ -23,6 +23,12 @@
             android:summary="@string/pref_loc_summary"
             android:title="@string/pref_loc_title" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="checkboxComm"
+            android:summary="@string/pref_comm_summary"
+            android:title="@string/pref_comm_title" />
+
         <EditTextPreference
             android:name="@string/pref_id_name"
             android:defaultValue=""
