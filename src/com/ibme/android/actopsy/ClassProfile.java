@@ -76,9 +76,7 @@ public class ClassProfile {
 	public static final long MILLIPERIOD = ClassConsts.MILLIDAY/LENGTH;
 
 	public class Values {
-		public float acc_avg;
 		public float acc_curr;
-		public int fb_updates;
 	}
 
 	private float[] mProfile;
@@ -162,9 +160,7 @@ public class ClassProfile {
 		for(int i=0; i<LENGTH; i++)
 		{
 			vals[i] = new Values();
-			vals[i].acc_avg = prefs.getFloat(Integer.toString(i) + "_S", 0);  
 			vals[i].acc_curr = prefs.getFloat(Integer.toString(i) + "_C", 0);
-			vals[i].fb_updates = prefs.getInt(Integer.toString(i) + "_FB", 0);
 		}
 
 		return vals;
@@ -196,23 +192,10 @@ public class ClassProfile {
 		}
 	}
 
-	// Update Facebook activity
-	public void update_fb(long ts)
-	{
-		SimpleDateFormat fmt = new SimpleDateFormat("EEE");
-		String profile = new String("profile-" + fmt.format(new Date(ts)));				
-		Bundle params = new Bundle();
-		params.putString("file", profile);
-		params.putLong("fb_ts", ts);
-		new UpdaterTask().execute(params);
-	}
-
 	private void clear()
 	{
-		SharedPreferences prefs = mContext.getSharedPreferences(ClassConsts.PREFS_SUMMARY, Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = prefs.edit();
-		editor.clear();
-		editor.commit();
+		SharedPreferences prefs;
+		SharedPreferences.Editor editor;
 
 		for (int i = 0; i < ClassConsts.DAYS.length; i++) {
 			prefs = mContext.getSharedPreferences("profile-" + ClassConsts.DAYS[i], Context.MODE_PRIVATE);
@@ -237,29 +220,12 @@ public class ClassProfile {
 				String file = params[0].getString("file");
 				int index = params[0].getInt("index");
 				float[] profile = params[0].getFloatArray("data");
-				long fb_ts = params[0].getLong("fb_ts");
 
 				// Update profile data
 				SharedPreferences prefs = mContext.getSharedPreferences(file, Context.MODE_PRIVATE);
 				SharedPreferences.Editor editor = prefs.edit();
 				if (profile != null) {
-					// update activity profile
-					n = prefs.getInt(Integer.toString(index) + "_N", 0);
-					f = prefs.getFloat(Integer.toString(index) + "_S", 0);
-					f = f*n/(n+1) + profile[index]/(n+1);
-					n++;
-					editor.putInt(Integer.toString(index) + "_N", n);
-					editor.putFloat(Integer.toString(index) + "_S", f);
 					editor.putFloat(Integer.toString(index) + "_C", profile[index]);
-				} else if (fb_ts > 0) {
-					// update Facebook profile
-					n = prefs.getInt(Integer.toString(ts2idx(fb_ts)) + "_FB", 0);
-					n++;
-					editor.putInt(Integer.toString(ts2idx(fb_ts)) + "_FB", n);
-
-					SharedPreferences.Editor editor_s = mContext.getSharedPreferences(ClassConsts.PREFS_SUMMARY, Context.MODE_PRIVATE).edit();
-					editor_s.putLong("fb_updated", fb_ts);
-					editor_s.commit();
 				}
 				editor.commit();
 			} catch (Exception e) {
