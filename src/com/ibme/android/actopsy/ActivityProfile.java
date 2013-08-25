@@ -206,10 +206,8 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 	private GraphicalView[] mChartView;
 	private XYMultipleSeriesRenderer[] mRenderer;
 	private XYMultipleSeriesDataset[] mDataset;
-	private XYSeriesRenderer[] mAvgRenderer;
-	private TimeSeries[] mAvgSeries;
-	private XYSeriesRenderer[] mCurrRenderer;
-	private TimeSeries[] mCurrSeries;
+	private XYSeriesRenderer[] mActRenderer;
+	private TimeSeries[] mActSeries;
 	private XYSeriesRenderer[] mRefRenderer;
 	private TimeSeries[] mRefSeries;
 	private int weekday;
@@ -219,10 +217,8 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 		mChartView = new GraphicalView[7];
 		mRenderer = new XYMultipleSeriesRenderer[7];
 		mDataset = new XYMultipleSeriesDataset[7];
-		mAvgRenderer = new XYSeriesRenderer[7];
-		mAvgSeries = new TimeSeries[7];
-		mCurrRenderer = new XYSeriesRenderer[7];
-		mCurrSeries = new TimeSeries[7];
+		mActRenderer = new XYSeriesRenderer[7];
+		mActSeries = new TimeSeries[7];
 		mRefRenderer = new XYSeriesRenderer[7];
 		mRefSeries = new TimeSeries[7];
 
@@ -249,38 +245,33 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 		for (int i=0; i<7; i++) {
 			mDataset[i] = new XYMultipleSeriesDataset();
 			mRenderer[i] = new XYMultipleSeriesRenderer();
-			mAvgRenderer[i] = new XYSeriesRenderer();
-			mAvgSeries[i] = new TimeSeries(Integer.toString(i));
-			mCurrRenderer[i] = new XYSeriesRenderer();
-			mCurrSeries[i] = new TimeSeries(Integer.toString(i));
+			mActRenderer[i] = new XYSeriesRenderer();
+			mActSeries[i] = new TimeSeries(Integer.toString(i));
 			mRefRenderer[i] = new XYSeriesRenderer();
 			mRefSeries[i] = new TimeSeries(Integer.toString(i));
 
 			ClassProfile.Values[] vals = new ClassProfile(this).get(i);
 			for(int j=0; j<ClassProfile.LENGTH; j++)
 			{
-				mAvgSeries[i].add(j*ClassConsts.MILLIDAY/ClassProfile.LENGTH, vals[j].acc_avg);
-				mCurrSeries[i].add(j*ClassConsts.MILLIDAY/ClassProfile.LENGTH, vals[j].acc_curr);
+				mActSeries[i].add(j*ClassConsts.MILLIDAY/ClassProfile.LENGTH, vals[j].acc_curr);
 				mRefSeries[i].add(j*ClassConsts.MILLIDAY/ClassProfile.LENGTH, ref[j]);
 			}
-			mAvgRenderer[i].setColor(Color.TRANSPARENT);
-			mAvgRenderer[i].setDisplayChartValues(false);
-			mAvgRenderer[i].setFillBelowLine(true);
-			mCurrRenderer[i].setDisplayChartValues(false);
-			mCurrRenderer[i].setFillBelowLine(false);
+			mActRenderer[i].setColor(Color.TRANSPARENT);
+			mActRenderer[i].setDisplayChartValues(false);
+			mActRenderer[i].setFillBelowLine(true);
 			mRefRenderer[i].setColor(Color.TRANSPARENT);
 			mRefRenderer[i].setDisplayChartValues(false);
 			mRefRenderer[i].setFillBelowLine(true);
 			// Highlight current day
 			if (i == weekday) {
-				mAvgRenderer[i].setFillBelowLineColor(Color.argb(0xd0, 0, 0x41, 0x67));
-				mCurrRenderer[i].setColor(Color.argb(0xff, 0, 0x21, 0x47));
+				mActRenderer[i].setColor(Color.argb(0xff, 0, 0x21, 0x47));
+				mActRenderer[i].setFillBelowLineColor(Color.argb(0xd0, 0, 0x41, 0x67));
 				mRefRenderer[i].setFillBelowLineColor(Color.argb(0x60, 0xf0, 0xe0, 0x00));
 				mRenderer[i].setLabelsColor(Color.argb(0xff, 0, 0x21, 0x47));
 				mRenderer[i].setXLabelsColor(Color.argb(0xff, 0, 0x21, 0x47));
 			} else {
-				mAvgRenderer[i].setFillBelowLineColor(Color.argb(0x60, 0, 0x41, 0x67));
-				mCurrRenderer[i].setColor(Color.argb(0x80, 0, 0x21, 0x47));
+				mActRenderer[i].setColor(Color.argb(0x80, 0, 0x21, 0x47));
+				mActRenderer[i].setFillBelowLineColor(Color.argb(0x60, 0, 0x41, 0x67));
 				mRefRenderer[i].setFillBelowLineColor(Color.argb(0x20, 0xf0, 0xe0, 0x00));
 				mRenderer[i].setLabelsColor(Color.argb(0x80, 0, 0x21, 0x47));
 				mRenderer[i].setXLabelsColor(Color.argb(0x80, 0, 0x21, 0x47));
@@ -316,11 +307,9 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 					0, (int)getResources().getDimension(R.dimen.chart_margin),
 					0, (int)getResources().getDimension(R.dimen.chart_margin) });
 
-			mDataset[i].addSeries(mAvgSeries[i]);
-			mDataset[i].addSeries(mCurrSeries[i]);
+			mDataset[i].addSeries(mActSeries[i]);
 			mDataset[i].addSeries(mRefSeries[i]);
-			mRenderer[i].addSeriesRenderer(mAvgRenderer[i]);
-			mRenderer[i].addSeriesRenderer(mCurrRenderer[i]);
+			mRenderer[i].addSeriesRenderer(mActRenderer[i]);
 			mRenderer[i].addSeriesRenderer(mRefRenderer[i]);
 			mChartView[i] = ChartFactory.getTimeChartView(this, mDataset[i], mRenderer[i], "HH:mm");
 			layout[i].addView(mChartView[i]);

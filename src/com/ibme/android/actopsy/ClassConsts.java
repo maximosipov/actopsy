@@ -32,12 +32,12 @@ package com.ibme.android.actopsy;
 public class ClassConsts {
 	public static final String FILES_ROOT = "/Android/data/com.ibme.android.actopsy/files/";
 	public static final String PREFS_SUMMARY = "profile-summary";
-	public static final String PREFS_STATS = "profile-stats";
 	public static final String PREFS_LOCATION = "location-prefs";
 	public static final String DATEFMT = "yyyy-MM-dd HH:mm:ss.SSSZ";
 
 	public static final long MILLIDAY = 24*60*60*1000;		// Day in milliseconds
 	public static final long MILLIHOUR = 60*60*1000;
+	public static final long MILLIMINUTE = 60*1000;
 
 	public static final String[] DAYS = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 

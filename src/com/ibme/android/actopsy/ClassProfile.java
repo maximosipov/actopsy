@@ -29,13 +29,26 @@
 
 package com.ibme.android.actopsy;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 
 ///////////////////////////////////////////////////////////////////////////
 // Activity profiles are stored in shared preferences with the following
@@ -99,6 +112,45 @@ public class ClassProfile {
 		mPeriodIdx = 0;
 		mPeriodSum = 0;
 		mPeriodNum = 0;
+	}
+
+	// Convert from preferences profiles
+	public void convert()
+	{
+		File root = Environment.getExternalStorageDirectory();
+		File folder = new File(root, ClassConsts.FILES_ROOT);
+		String name = new String("activity-" + ClassConsts.DAYS[0] + ".json");
+		File file = new File(folder, name);
+		if (file.exists())
+			return;
+
+		for (int day = 0; day < 7; day++) {
+			// read in
+			ClassProfile cp = new ClassProfile(mContext);
+			ClassProfile.Values[] vals = new ClassProfile.Values[ClassProfile.LENGTH];
+			String profile = new String("profile-" + ClassConsts.DAYS[day]);
+			SharedPreferences prefs = mContext.getSharedPreferences(profile, Context.MODE_PRIVATE);
+			for(int i=0; i<ClassProfile.LENGTH; i++)
+			{
+				vals[i] = cp.new Values();
+				vals[i].acc_curr = prefs.getFloat(Integer.toString(i) + "_C", 0);
+			}
+			// recalculate
+			ArrayList<Val> cur = new ArrayList<Val>();
+			for(int i=0; i<ClassProfile.LENGTH; i++)
+			{
+				cur.add(new Val(i*ClassConsts.MILLIDAY/ClassProfile.LENGTH, vals[i].acc_curr));
+			}
+			// write out
+			String c_name = new String("activity-" + ClassConsts.DAYS[day] + ".json");
+			File c_file = new File(folder, c_name);
+			try {
+				FileOutputStream c_stream = new FileOutputStream(c_file);
+				writeVals(c_stream, cur);
+			} catch (IOException e) {
+				new ClassEvents(TAG, "ERROR", "Couldn't write " + c_name);
+			}
+		}
 	}
 
 	// Get profile values for a numbered week day
@@ -216,5 +268,41 @@ public class ClassProfile {
 
 			return null;
 		}
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+	// JSON serialization support functions
+	///////////////////////////////////////////////////////////////////////////
+	// Current profile management
+	public class Val {
+		public long mTime;
+		public float mVal;
+		public Val(long t, float v) { mTime = t; mVal = v; }
+	}
+
+	private ArrayList<Val> readVals(InputStream in) throws IOException {
+		Gson gson = new Gson();
+		JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+		ArrayList<Val> vals = new ArrayList<Val>();
+		reader.beginArray();
+		while (reader.hasNext()) {
+			Val v = gson.fromJson(reader, Val.class);
+			vals.add(v);
+		}
+		reader.endArray();
+		reader.close();
+		return vals;
+	}
+
+	private void writeVals(OutputStream out, ArrayList<Val> vals) throws IOException {
+		Gson gson = new Gson();
+		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
+		writer.setIndent("  ");
+		writer.beginArray();
+		for (Val v : vals) {
+			gson.toJson(v, Val.class, writer);
+		}
+		writer.endArray();
+		writer.close();
 	}
 }
