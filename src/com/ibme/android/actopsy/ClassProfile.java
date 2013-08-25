@@ -76,7 +76,8 @@ public class ClassProfile {
 	public static final long MILLIPERIOD = ClassConsts.MILLIDAY/LENGTH;
 
 	public class Values {
-		public float acc_curr;
+		public float t;
+		public float v;
 	}
 
 	private float[] mProfile;
@@ -131,13 +132,13 @@ public class ClassProfile {
 			for(int i=0; i<ClassProfile.LENGTH; i++)
 			{
 				vals[i] = cp.new Values();
-				vals[i].acc_curr = prefs.getFloat(Integer.toString(i) + "_C", 0);
+				vals[i].v = prefs.getFloat(Integer.toString(i) + "_C", 0);
 			}
 			// recalculate
 			ArrayList<Val> cur = new ArrayList<Val>();
 			for(int i=0; i<ClassProfile.LENGTH; i++)
 			{
-				cur.add(new Val(i*ClassConsts.MILLIDAY/ClassProfile.LENGTH, vals[i].acc_curr));
+				cur.add(new Val(i*ClassConsts.MILLIDAY/ClassProfile.LENGTH, vals[i].v));
 			}
 			// write out
 			String c_name = new String("activity-" + ClassConsts.DAYS[day] + ".json");
@@ -160,7 +161,8 @@ public class ClassProfile {
 		for(int i=0; i<LENGTH; i++)
 		{
 			vals[i] = new Values();
-			vals[i].acc_curr = prefs.getFloat(Integer.toString(i) + "_C", 0);
+			vals[i].t = i*ClassConsts.MILLIDAY/LENGTH;
+			vals[i].v = prefs.getFloat(Integer.toString(i) + "_C", 0);
 		}
 
 		return vals;
