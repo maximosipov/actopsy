@@ -250,11 +250,16 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 			mRefRenderer[i] = new XYSeriesRenderer();
 			mRefSeries[i] = new TimeSeries(Integer.toString(i));
 
+			// activity profile
 			ClassProfile.Values[] vals = new ClassProfile(this).get(i);
 			for(int j=0; j<ClassProfile.LENGTH; j++)
 			{
 				mActSeries[i].add(j*ClassConsts.MILLIDAY/ClassProfile.LENGTH, vals[j].acc_curr);
-				mRefSeries[i].add(j*ClassConsts.MILLIDAY/ClassProfile.LENGTH, ref[j]);
+			}
+			// reference (light?) profile
+			for(int j=0; j<REF_LENGTH; j++)
+			{
+				mRefSeries[i].add(j*ClassConsts.MILLIDAY/REF_LENGTH, ref[j]);
 			}
 			mActRenderer[i].setColor(Color.TRANSPARENT);
 			mActRenderer[i].setDisplayChartValues(false);
@@ -316,31 +321,32 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 		}
 	}
 	
+	public static final int REF_LENGTH = 24*4;		// 15 minutes intervals
 	float[] chartGetRef() {
-		float[] ref = new float[ClassProfile.LENGTH];
+		float[] ref = new float[REF_LENGTH];
 		float max_level = 3;
 		int i = 0;
 		int j;
 		// morning (0:00 - 6:00)
-		for (; i < ClassProfile.LENGTH/24 * 6; i++) {
+		for (; i < REF_LENGTH/24 * 6; i++) {
 			ref[i] = 0;
 		}
 		// raise (6:00 - 8:00)
 		j = i;
-		for (; i < ClassProfile.LENGTH/24 * 9; i++) {
+		for (; i < REF_LENGTH/24 * 9; i++) {
 			// scale 6..8 to pi..2pi
-			float arg = (float) ((float) ((i-j)/((float)(ClassProfile.LENGTH/24*3)) * Math.PI) + Math.PI);
+			float arg = (float) ((float) ((i-j)/((float)(REF_LENGTH/24*3)) * Math.PI) + Math.PI);
 			ref[i] = (float) ((Math.cos(arg)+1)*max_level/2);
 		}
 		// day (8:00 - 21:00)
-		for (; i < ClassProfile.LENGTH/24 * 21; i++) {
+		for (; i < REF_LENGTH/24 * 21; i++) {
 			ref[i] = max_level;
 		}
 		// fall (21:00 - 23:00)
 		j = i;
-		for (; i < ClassProfile.LENGTH; i++) {
+		for (; i < REF_LENGTH; i++) {
 			// scale 21..23 to 0..pi
-			float arg = (float) ((float) ((i-j)/((float)(ClassProfile.LENGTH/24*3)) * Math.PI));
+			float arg = (float) ((float) ((i-j)/((float)(REF_LENGTH/24*3)) * Math.PI));
 			ref[i] = (float) ((Math.cos(arg)+1)*max_level/2);
 		}
 		return ref;
