@@ -252,8 +252,8 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 
 			// activity profile
 			ClassProfile.Values[] vals = new ClassProfile(this).get(i);
-			for(int j=0; j<ClassProfile.LENGTH; j++) {
-				mActSeries[i].add(vals[j].t, vals[j].v);
+			for(int j=0; j<vals.length; j++) {
+				mActSeries[i].add(vals[j].t % ClassConsts.MILLIDAY, vals[j].v);
 			}
 			// reference (light?) profile
 			for(int j=0; j<REF_LENGTH; j++) {

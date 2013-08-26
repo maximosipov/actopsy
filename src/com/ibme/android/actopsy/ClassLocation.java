@@ -62,7 +62,7 @@ public class ClassLocation {
 	{
 		// Initialize coordinate randomization seeds with last known location
 		SharedPreferences prefs = mContext.getSharedPreferences(
-		        ClassConsts.PREFS_LOCATION, mContext.MODE_PRIVATE);
+		        ClassConsts.PREFS_PRIVATE, mContext.MODE_PRIVATE);
 		mSeedLat = prefs.getFloat("seedLat", 0);
 		mSeedLon = prefs.getFloat("seedLon", 0);
 		if (mSeedLat == 0 && mSeedLon == 0) {

@@ -30,6 +30,7 @@
 package com.ibme.android.actopsy;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,41 +51,23 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 
-///////////////////////////////////////////////////////////////////////////
-// Activity profiles are stored in shared preferences with the following
-// structure:
-//
-// profile-summary - summary of profile data
-//  - fb_updated: Date of the last update of Facebook data
-//
-// profile-DayOfWeek - array of values with PROFILE_LENGTH intervals
-//  - x_S - average activity level in xth interval
-//  - x_N - number of days, contributed to xth interval
-//  - x_C - last recorded value of xth interval
-//  - x_FB - number of Facebook status update in xth interval
-//
-// profile-stats - array of values for Statistics screen
-//  - x_L - average level of activity in xth interval
-// 
-///////////////////////////////////////////////////////////////////////////
-
 public class ClassProfile {
 
 	private static final String TAG = "ActopsyProfile";
 
-	public static final int LENGTH = 24*4;		// 15 minutes intervals
+	public static final int LENGTH_V7 = 24*4;		// 15 minutes intervals (keep old value for convert)
+	public static final int LENGTH = 24*60;		// 1 minutes intervals
 	public static final long MILLIPERIOD = ClassConsts.MILLIDAY/LENGTH;
 
 	public class Values {
-		public float t;
+		public long t;
 		public float v;
+		public Values(long time, float val) { t = time; v = val; }
 	}
 
-	private float[] mProfile;
 	private long mPeriodLimit;
 	private double mPeriodSum;
 	private long mPeriodNum;
-	private int mPeriodIdx;
 
 	private Context mContext;
 
@@ -95,12 +78,8 @@ public class ClassProfile {
 
 	public void init(long ts)
 	{
-		mProfile = new float[LENGTH];
-		for (int i = 0; i < mProfile.length; i++) {
-			mProfile[i] = 0;
-		}
+		convert(ts);
 		mPeriodLimit =  ((long)ts/MILLIPERIOD)*MILLIPERIOD + MILLIPERIOD;
-		mPeriodIdx = ts2idx(ts);
 		mPeriodSum = 0;
 		mPeriodNum = 0;
 	}
@@ -108,64 +87,73 @@ public class ClassProfile {
 	public void fini()
 	{
 		mPeriodLimit =  MILLIPERIOD;
-		mPeriodIdx = 0;
 		mPeriodSum = 0;
 		mPeriodNum = 0;
 	}
 
 	// Convert from preferences profiles
-	public void convert()
+	public void convert(long ts)
 	{
-		File root = Environment.getExternalStorageDirectory();
-		File folder = new File(root, ClassConsts.FILES_ROOT);
-		String name = new String("activity-" + ClassConsts.DAYS[0] + ".json");
-		File file = new File(folder, name);
-		if (file.exists())
+		SharedPreferences prefs = mContext.getSharedPreferences(
+		        ClassConsts.PREFS_PRIVATE, Context.MODE_PRIVATE);
+		if(prefs.getBoolean("updatedProfileV7", false))
 			return;
 
 		for (int day = 0; day < 7; day++) {
-			// read in
-			ClassProfile cp = new ClassProfile(mContext);
-			ClassProfile.Values[] vals = new ClassProfile.Values[ClassProfile.LENGTH];
+			// calculate day offset from today
+			int offset = wd2offset(ts, day);
+			// read in and recalculate
+			long dayval = (ts/ClassConsts.MILLIDAY - offset)*ClassConsts.MILLIDAY;
+			ArrayList<Values> jvals = new ArrayList<Values>();
 			String profile = new String("profile-" + ClassConsts.DAYS[day]);
-			SharedPreferences prefs = mContext.getSharedPreferences(profile, Context.MODE_PRIVATE);
-			for(int i=0; i<ClassProfile.LENGTH; i++)
+			SharedPreferences prof = mContext.getSharedPreferences(profile, Context.MODE_PRIVATE);
+			for(int i=0; i<LENGTH_V7; i++)
 			{
-				vals[i] = cp.new Values();
-				vals[i].v = prefs.getFloat(Integer.toString(i) + "_C", 0);
-			}
-			// recalculate
-			ArrayList<Val> cur = new ArrayList<Val>();
-			for(int i=0; i<ClassProfile.LENGTH; i++)
-			{
-				cur.add(new Val(i*ClassConsts.MILLIDAY/ClassProfile.LENGTH, vals[i].v));
+				Values val = new Values(0, 0);
+				val.t = dayval + i*ClassConsts.MILLIDAY/LENGTH_V7;
+				val.v = prof.getFloat(Integer.toString(i) + "_C", 0);
+				jvals.add(val);
 			}
 			// write out
-			String c_name = new String("activity-" + ClassConsts.DAYS[day] + ".json");
-			File c_file = new File(folder, c_name);
+			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+			String name = new String("profile-activity-" + fmt.format(new Date(dayval)) + ".json");
+			File root = Environment.getExternalStorageDirectory();
+			File folder = new File(root, ClassConsts.FILES_ROOT);
+			File file = new File(folder, name);
 			try {
-				FileOutputStream c_stream = new FileOutputStream(c_file);
-				writeVals(c_stream, cur);
+				FileOutputStream stream = new FileOutputStream(file);
+				writeVals(stream, jvals);
 			} catch (IOException e) {
-				new ClassEvents(TAG, "ERROR", "Couldn't write " + c_name);
+				new ClassEvents(TAG, "ERROR", "Couldn't write " + name);
 			}
+			new ClassEvents(TAG, "INFO", "Converted " + profile + " to " + name);
 		}
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putBoolean("updatedProfileV7", true);
+		editor.commit();
 	}
 
 	// Get profile values for a numbered week day
 	public Values[] get(int day)
 	{
-		Values[] vals = new Values[LENGTH];
-		String profile = new String("profile-" + ClassConsts.DAYS[day]);
-		SharedPreferences prefs = mContext.getSharedPreferences(profile, Context.MODE_PRIVATE);
-		for(int i=0; i<LENGTH; i++)
-		{
-			vals[i] = new Values();
-			vals[i].t = i*ClassConsts.MILLIDAY/LENGTH;
-			vals[i].v = prefs.getFloat(Integer.toString(i) + "_C", 0);
+		ArrayList<Values> vals = new ArrayList<Values>();
+		long ts = System.currentTimeMillis();
+		int offset = wd2offset(ts, day);
+		long dayval = (ts/ClassConsts.MILLIDAY - offset)*ClassConsts.MILLIDAY;
+
+		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+		String name = new String("profile-activity-" + fmt.format(new Date(dayval)) + ".json");
+		File root = Environment.getExternalStorageDirectory();
+		File folder = new File(root, ClassConsts.FILES_ROOT);
+		File file = new File(folder, name);
+		try {
+			FileInputStream stream = new FileInputStream(file);
+			vals = readVals(stream);
+		} catch (IOException e) {
+			new ClassEvents(TAG, "ERROR", "Couldn't read " + name);
 		}
 
-		return vals;
+		return vals.toArray(new Values[vals.size()]);
 	}
 
 	// Update acceleration value
@@ -174,64 +162,64 @@ public class ClassProfile {
 		// Detect profile period roll-over and save (average) data
 		if (ts > mPeriodLimit) {
 			if (mPeriodNum > 0) {
-				mProfile[mPeriodIdx] = (float)(mPeriodSum/mPeriodNum);
 				// Save averaged for all history profile data
-				SimpleDateFormat fmt = new SimpleDateFormat("EEE");
-				String profile = new String("profile-" + fmt.format(new Date(mPeriodLimit-1)));				
 				Bundle params = new Bundle();
-				params.putString("file", profile);
-				params.putInt("index", mPeriodIdx);
-				params.putFloatArray("data", mProfile);
+				params.putLong("time", mPeriodLimit);
+				params.putFloat("val", (float)(mPeriodSum/mPeriodNum));
 				new UpdaterTask().execute(params);
 			}
 			mPeriodSum = Math.abs(Math.sqrt(x*x + y*y + z*z) - ClassConsts.G);
 			mPeriodNum = 1;
 			mPeriodLimit = ((long)ts/MILLIPERIOD)*MILLIPERIOD + MILLIPERIOD;
-			mPeriodIdx = ts2idx(ts);
 		} else {
 			mPeriodSum += Math.abs(Math.sqrt(x*x + y*y + z*z) - ClassConsts.G);
 			mPeriodNum ++;
 		}
 	}
 
-	private void clear()
+	private int wd2offset(long ts, int day)
 	{
-		SharedPreferences prefs;
-		SharedPreferences.Editor editor;
+		int weekday = 0;
+		int offset = 0;
+		SimpleDateFormat fmt = new SimpleDateFormat("EEE");
+		String today = new String(fmt.format(new Date(ts)));
+		while (weekday < ClassConsts.DAYS.length && !ClassConsts.DAYS[weekday].equals(today))
+			weekday++;
 
-		for (int i = 0; i < ClassConsts.DAYS.length; i++) {
-			prefs = mContext.getSharedPreferences("profile-" + ClassConsts.DAYS[i], Context.MODE_PRIVATE);
-			editor = prefs.edit();
-			editor.clear();
-			editor.commit();
+		if (day < weekday) {
+			offset = 7 - weekday;
+		} else {
+			offset = day - weekday;
 		}
-	}
-	
-	private int ts2idx(long ts)
-	{
-		return (int)((ts - ((long)(ts/ClassConsts.MILLIDAY))*ClassConsts.MILLIDAY)/MILLIPERIOD);
+
+		return offset;
 	}
 
 	private class UpdaterTask extends AsyncTask<Bundle, Void, Void> {
 		@Override
 		protected Void doInBackground(Bundle... params) {
-			int n;
-			float f;
+			ArrayList<Values> vals = new ArrayList<Values>();
+			long time = params[0].getLong("time");
+			float val = params[0].getFloat("val");
 
+			// Update profile data
+			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+			String name = new String("profile-activity-" + fmt.format(new Date(time)) + ".json");
 			try {
-				String file = params[0].getString("file");
-				int index = params[0].getInt("index");
-				float[] profile = params[0].getFloatArray("data");
-
-				// Update profile data
-				SharedPreferences prefs = mContext.getSharedPreferences(file, Context.MODE_PRIVATE);
-				SharedPreferences.Editor editor = prefs.edit();
-				if (profile != null) {
-					editor.putFloat(Integer.toString(index) + "_C", profile[index]);
+				File root = Environment.getExternalStorageDirectory();
+				File folder = new File(root, ClassConsts.FILES_ROOT);
+				File file = new File(folder, name);
+				try {
+					FileInputStream istream = new FileInputStream(file);
+					vals = readVals(istream);
+				} catch (Exception e) {
+					new ClassEvents(TAG, "ERROR", "Could not read profile " + name + ", resetting: " + e.getMessage());
 				}
-				editor.commit();
+				FileOutputStream ostream = new FileOutputStream(file);
+				vals.add(new Values(time, val));
+				writeVals(ostream, vals);
 			} catch (Exception e) {
-				new ClassEvents(TAG, "ERROR", "Could not update profile " + e.getMessage());
+				new ClassEvents(TAG, "ERROR", "Could not update profile " + name + " :" + e.getMessage());
 			}
 
 			return null;
@@ -241,20 +229,13 @@ public class ClassProfile {
 	///////////////////////////////////////////////////////////////////////////
 	// JSON serialization support functions
 	///////////////////////////////////////////////////////////////////////////
-	// Current profile management
-	public class Val {
-		public long mTime;
-		public float mVal;
-		public Val(long t, float v) { mTime = t; mVal = v; }
-	}
-
-	private ArrayList<Val> readVals(InputStream in) throws IOException {
+	private ArrayList<Values> readVals(InputStream in) throws IOException {
 		Gson gson = new Gson();
 		JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
-		ArrayList<Val> vals = new ArrayList<Val>();
+		ArrayList<Values> vals = new ArrayList<Values>();
 		reader.beginArray();
 		while (reader.hasNext()) {
-			Val v = gson.fromJson(reader, Val.class);
+			Values v = gson.fromJson(reader, Values.class);
 			vals.add(v);
 		}
 		reader.endArray();
@@ -262,13 +243,13 @@ public class ClassProfile {
 		return vals;
 	}
 
-	private void writeVals(OutputStream out, ArrayList<Val> vals) throws IOException {
+	private void writeVals(OutputStream out, ArrayList<Values> vals) throws IOException {
 		Gson gson = new Gson();
 		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
 		writer.setIndent("  ");
 		writer.beginArray();
-		for (Val v : vals) {
-			gson.toJson(v, Val.class, writer);
+		for (Values v : vals) {
+			gson.toJson(v, Values.class, writer);
 		}
 		writer.endArray();
 		writer.close();
