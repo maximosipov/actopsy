@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -66,10 +67,13 @@ public class ClassLocation {
 		mSeedLat = prefs.getFloat("seedLat", 0);
 		mSeedLon = prefs.getFloat("seedLon", 0);
 		if (mSeedLat == 0 && mSeedLon == 0) {
-			LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-			Location l = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			mSeedLat = (float)l.getLatitude();
-			mSeedLon = (float)l.getLongitude();
+			// LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+			// Location l = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			// mSeedLat = (float)l.getLatitude();
+			// mSeedLon = (float)l.getLongitude();
+			Random r = new Random();
+			mSeedLat = (float)r.nextDouble()*90;
+			mSeedLon = (float)r.nextDouble()*180;
 			SharedPreferences.Editor editor = prefs.edit();
 			editor.putFloat("seedLat", mSeedLat);
 			editor.putFloat("seedLon", mSeedLon);
