@@ -42,7 +42,21 @@
             android:key="editUserPass"
             android:summary="@string/pref_pass_summary"
             android:title="@string/pref_pass_name" />
-    </PreferenceCategory>
+
+        <EditTextPreference
+            android:name="@string/pref_tc_id_name"
+            android:defaultValue=""
+            android:key="editUserIDTC"
+            android:summary="@string/pref_tc_id_summary"
+            android:title="@string/pref_tc_id_name" />
+        
+        <EditTextPreference
+            android:name="@string/pref_tc_pass_name"
+            android:defaultValue=""
+            android:key="editUserPassTC"
+            android:summary="@string/pref_tc_pass_summary"
+            android:title="@string/pref_tc_pass_name" />
+	</PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_personal" >
 

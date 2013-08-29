@@ -33,6 +33,12 @@
 	<string name="pref_pass_name">Study password</string>
     <string name="pref_pass_summary">Please enter the password, associated with this ID</string>
 
+    <string name="pref_tc_id_name">True Colours user name</string>
+    <string name="pref_tc_id_summary">Please enter your True Colours user name, if you would like to export your activity profile there</string>
+
+    <string name="pref_tc_pass_name">True Colours password</string>
+    <string name="pref_tc_pass_summary">Please enter your True Colours password, if you would like to export your activity profile there</string>
+
     <string name="pref_usage_title">Phone usage</string>
     <string name="pref_usage_summary">What is your typical mobile phone usage pattern?</string>
 

@@ -121,7 +121,7 @@ public class ClassProfileAccelerometry {
 			{
 				Values val = new Values(0, 0, 0, 0);
 				val.t = dayoff + offset + j*ClassConsts.MILLIDAY/LENGTH_V7;
-				val.x = prof.getFloat(Integer.toString(j) + "_C", 0);
+				val.x = (float) (prof.getFloat(Integer.toString(j) + "_C", 0) + ClassConsts.G);
 				jvals.add(val);
 			}
 			// write out

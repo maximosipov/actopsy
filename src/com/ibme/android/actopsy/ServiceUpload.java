@@ -167,7 +167,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 					File[] files = getFiles(".*zip$");
 					if (files != null) {
 						for (int i = 0; i < files.length; i++) {
-							new TaskUploader(context).execute(files[i]);
+							new TaskUploaderIBME(context).execute(files[i]);
 						}
 					}
 				} else {

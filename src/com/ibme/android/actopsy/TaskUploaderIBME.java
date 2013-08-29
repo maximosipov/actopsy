@@ -60,15 +60,15 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
 
-public class TaskUploader extends AsyncTask<File, Void, Void> {
+public class TaskUploaderIBME extends AsyncTask<File, Void, Void> {
 
-	private static final String TAG = "ActopsyTaskUploader";
+	private static final String TAG = "ActopsyTaskUploaderIBME";
 
 	final Context context;
 	private String mUserID;
 	private String mUserPass;
 
-	TaskUploader(Context context) {
+	TaskUploaderIBME(Context context) {
 		this.context = context;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		mUserID = prefs.getString("editUserID", "");
