@@ -38,8 +38,6 @@ public class ClassConsts {
 	public static final long MILLIHOUR = 60*60*1000L;
 	public static final long MILLIMINUTE = 60*1000L;
 
-	public static final String[] DAYS = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-
 	public static final double G = 9.81;
 	
 	public static final long LOC_TIME = 1*60*1000;			// 1 minute granularity
@@ -49,6 +47,7 @@ public class ClassConsts {
 	public static final long UPLOAD_PERIOD = 24*60*60*1000L;	// 24 hours
 	public static final String UPLOAD_URL = "https://ibme-web7.eng.ox.ac.uk/upload.php";
 	public static final String UPLOAD_SIZE = "10000000"; // 10MB
+	public static final String UPLOAD_TC_URL = "https://truecolours.nhs.uk/apps/demo/en/api/participants/";
 
 	public static final int BUFFER_SIZE = 8192;
 }

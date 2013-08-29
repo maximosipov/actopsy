@@ -40,6 +40,8 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -51,9 +53,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 
-public class ClassProfile {
+public class ClassProfileAccelerometry {
 
-	private static final String TAG = "ActopsyProfile";
+	private static final String TAG = "ActopsyProfileAccelerometry";
 
 	public static final int LENGTH_V7 = 24*4;		// 15 minutes intervals (keep old value for convert)
 	public static final int LENGTH = 24*60;		// 1 minutes intervals
@@ -61,17 +63,20 @@ public class ClassProfile {
 
 	public class Values {
 		public long t;
-		public float v;
-		public Values(long time, float val) { t = time; v = val; }
+		public float x;
+		public float y;
+		public float z;
+		public Values(long time, float xv, float yv, float zv)
+			{ t = time; x = xv; y = yv; z = zv; }
 	}
 
 	private long mPeriodLimit;
-	private double mPeriodSum;
+	private double mPeriodSumX, mPeriodSumY, mPeriodSumZ;
 	private long mPeriodNum;
 
 	private Context mContext;
 
-	public ClassProfile(Context context)
+	public ClassProfileAccelerometry(Context context)
 	{
 		mContext = context;
 	}
@@ -80,14 +85,18 @@ public class ClassProfile {
 	{
 		convert(ts);
 		mPeriodLimit =  ((long)ts/MILLIPERIOD)*MILLIPERIOD + MILLIPERIOD;
-		mPeriodSum = 0;
+		mPeriodSumX = 0;
+		mPeriodSumY = 0;
+		mPeriodSumZ = 0;
 		mPeriodNum = 0;
 	}
 
 	public void fini()
 	{
 		mPeriodLimit =  MILLIPERIOD;
-		mPeriodSum = 0;
+		mPeriodSumX = 0;
+		mPeriodSumY = 0;
+		mPeriodSumZ = 0;
 		mPeriodNum = 0;
 	}
 
@@ -99,24 +108,25 @@ public class ClassProfile {
 		if(prefs.getBoolean("updatedProfileV7", false))
 			return;
 
-		for (int day = 0; day < 7; day++) {
-			// calculate day offset from today
-			int offset = wd2offset(ts, day);
-			// read in and recalculate
-			long dayval = (ts/ClassConsts.MILLIDAY - offset)*ClassConsts.MILLIDAY;
+		long offset = TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings();
+		for (int i=0; i<7; i++) {
+			long daynum = ts-i*ClassConsts.MILLIDAY;
 			ArrayList<Values> jvals = new ArrayList<Values>();
-			String profile = new String("profile-" + ClassConsts.DAYS[day]);
+			// read in and convert
+			SimpleDateFormat fmt = new SimpleDateFormat("EEE");
+			String profile = new String("profile-" + new String(fmt.format(new Date(daynum))));
 			SharedPreferences prof = mContext.getSharedPreferences(profile, Context.MODE_PRIVATE);
-			for(int i=0; i<LENGTH_V7; i++)
+			long dayoff = (ts/ClassConsts.MILLIDAY - i) * ClassConsts.MILLIDAY;
+			for(int j=0; j<LENGTH_V7; j++)
 			{
-				Values val = new Values(0, 0);
-				val.t = dayval + i*ClassConsts.MILLIDAY/LENGTH_V7;
-				val.v = prof.getFloat(Integer.toString(i) + "_C", 0);
+				Values val = new Values(0, 0, 0, 0);
+				val.t = dayoff + offset + j*ClassConsts.MILLIDAY/LENGTH_V7;
+				val.x = prof.getFloat(Integer.toString(j) + "_C", 0);
 				jvals.add(val);
 			}
 			// write out
-			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-			String name = new String("profile-activity-" + fmt.format(new Date(dayval)) + ".json");
+			fmt = new SimpleDateFormat("yyyy-MM-dd");
+			String name = new String("profile-activity-" + fmt.format(new Date(daynum)) + ".json");
 			File root = Environment.getExternalStorageDirectory();
 			File folder = new File(root, ClassConsts.FILES_ROOT);
 			File file = new File(folder, name);
@@ -134,15 +144,11 @@ public class ClassProfile {
 	}
 
 	// Get profile values for a numbered week day
-	public Values[] get(int day)
+	public Values[] get(long ts)
 	{
 		ArrayList<Values> vals = new ArrayList<Values>();
-		long ts = System.currentTimeMillis();
-		int offset = wd2offset(ts, day);
-		long dayval = (ts/ClassConsts.MILLIDAY - offset)*ClassConsts.MILLIDAY;
-
 		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-		String name = new String("profile-activity-" + fmt.format(new Date(dayval)) + ".json");
+		String name = new String("profile-activity-" + fmt.format(new Date(ts)) + ".json");
 		File root = Environment.getExternalStorageDirectory();
 		File folder = new File(root, ClassConsts.FILES_ROOT);
 		File file = new File(folder, name);
@@ -165,34 +171,22 @@ public class ClassProfile {
 				// Save averaged for all history profile data
 				Bundle params = new Bundle();
 				params.putLong("time", mPeriodLimit);
-				params.putFloat("val", (float)(mPeriodSum/mPeriodNum));
+				params.putFloat("x", (float)(mPeriodSumX/mPeriodNum));
+				params.putFloat("y", (float)(mPeriodSumY/mPeriodNum));
+				params.putFloat("z", (float)(mPeriodSumZ/mPeriodNum));
 				new UpdaterTask().execute(params);
 			}
-			mPeriodSum = Math.abs(Math.sqrt(x*x + y*y + z*z) - ClassConsts.G);
+			mPeriodSumX = x;
+			mPeriodSumY = y;
+			mPeriodSumZ = z;
 			mPeriodNum = 1;
 			mPeriodLimit = ((long)ts/MILLIPERIOD)*MILLIPERIOD + MILLIPERIOD;
 		} else {
-			mPeriodSum += Math.abs(Math.sqrt(x*x + y*y + z*z) - ClassConsts.G);
+			mPeriodSumX += Math.abs(x);
+			mPeriodSumY += Math.abs(y);
+			mPeriodSumZ += Math.abs(z);
 			mPeriodNum ++;
 		}
-	}
-
-	private int wd2offset(long ts, int day)
-	{
-		int weekday = 0;
-		int offset = 0;
-		SimpleDateFormat fmt = new SimpleDateFormat("EEE");
-		String today = new String(fmt.format(new Date(ts)));
-		while (weekday < ClassConsts.DAYS.length && !ClassConsts.DAYS[weekday].equals(today))
-			weekday++;
-
-		if (day < weekday) {
-			offset = 7 - weekday;
-		} else {
-			offset = day - weekday;
-		}
-
-		return offset;
 	}
 
 	private class UpdaterTask extends AsyncTask<Bundle, Void, Void> {
@@ -200,7 +194,9 @@ public class ClassProfile {
 		protected Void doInBackground(Bundle... params) {
 			ArrayList<Values> vals = new ArrayList<Values>();
 			long time = params[0].getLong("time");
-			float val = params[0].getFloat("val");
+			float x = params[0].getFloat("x");
+			float y = params[0].getFloat("y");
+			float z = params[0].getFloat("z");
 
 			// Update profile data
 			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
@@ -216,7 +212,7 @@ public class ClassProfile {
 					new ClassEvents(TAG, "ERROR", "Could not read profile " + name + ", resetting: " + e.getMessage());
 				}
 				FileOutputStream ostream = new FileOutputStream(file);
-				vals.add(new Values(time, val));
+				vals.add(new Values(time, x, y, z));
 				writeVals(ostream, vals);
 			} catch (Exception e) {
 				new ClassEvents(TAG, "ERROR", "Could not update profile " + name + " :" + e.getMessage());

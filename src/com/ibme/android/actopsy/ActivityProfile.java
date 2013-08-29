@@ -37,6 +37,7 @@ import com.actionbarsherlock.view.MenuItem;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
@@ -230,19 +231,17 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 		layout[5] = (LinearLayout) findViewById(R.id.linearLayoutActSAT);
 		layout[6] = (LinearLayout) findViewById(R.id.linearLayoutActSUN);
 
-		// find week day number
-		long ts = System.currentTimeMillis();
-		SimpleDateFormat fmt = new SimpleDateFormat("EEE");
-		String today = new String(fmt.format(new Date(ts)));
-		weekday = 0;
-		while (weekday < ClassConsts.DAYS.length && !ClassConsts.DAYS[weekday].equals(today))
-			weekday++;
-
 		// initialize reference values
 		float[] ref = chartGetRef();
 
 		// initialise charts
+		long ts = System.currentTimeMillis();
+		SimpleDateFormat fmt = new SimpleDateFormat("EEE, dd-MMM");
 		for (int i=0; i<7; i++) {
+			long daynum = ts-i*ClassConsts.MILLIDAY;
+			long offset = TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings();
+			String daystr = new String(fmt.format(new Date(daynum)));
+
 			mDataset[i] = new XYMultipleSeriesDataset();
 			mRenderer[i] = new XYMultipleSeriesRenderer();
 			mActRenderer[i] = new XYSeriesRenderer();
@@ -251,9 +250,11 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 			mRefSeries[i] = new TimeSeries(Integer.toString(i));
 
 			// activity profile
-			ClassProfile.Values[] vals = new ClassProfile(this).get(i);
+			ClassProfileAccelerometry.Values[] vals = new ClassProfileAccelerometry(this).get(daynum);
 			for(int j=0; j<vals.length; j++) {
-				mActSeries[i].add(vals[j].t % ClassConsts.MILLIDAY, vals[j].v);
+				long t = (vals[j].t + offset) % ClassConsts.MILLIDAY;
+				double v = Math.abs(Math.sqrt(vals[j].x*vals[j].x + vals[j].y*vals[j].y + vals[j].z*vals[j].z) - ClassConsts.G);
+				mActSeries[i].add(t, v);
 			}
 			// reference (light?) profile
 			for(int j=0; j<REF_LENGTH; j++) {
@@ -281,7 +282,7 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 			}
 
 			mRenderer[i].setChartTitleTextSize(getResources().getDimension(R.dimen.chart_font_large));
-			mRenderer[i].setChartTitle(ClassConsts.DAYS[i]);
+			mRenderer[i].setChartTitle(daystr);
 			mRenderer[i].setShowLabels(true);
 			mRenderer[i].setLabelsTextSize(getResources().getDimension(R.dimen.chart_font_small));
 			mRenderer[i].setYLabels(0);
@@ -290,10 +291,10 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 			mRenderer[i].setXAxisMin(0);
 			mRenderer[i].setXAxisMax(ClassConsts.MILLIDAY);
 			mRenderer[i].addXTextLabel(0, "00:00");
-			mRenderer[i].addXTextLabel(ClassConsts.MILLIDAY/4, "6:00");
-			mRenderer[i].addXTextLabel(ClassConsts.MILLIDAY/2, "12:00");
-			mRenderer[i].addXTextLabel(ClassConsts.MILLIDAY/4*3, "18:00");
-			mRenderer[i].addXTextLabel(ClassConsts.MILLIDAY, "24:00");
+			mRenderer[i].addXTextLabel(ClassConsts.MILLIHOUR*6, "6:00");
+			mRenderer[i].addXTextLabel(ClassConsts.MILLIHOUR*12, "12:00");
+			mRenderer[i].addXTextLabel(ClassConsts.MILLIHOUR*18, "18:00");
+			mRenderer[i].addXTextLabel(ClassConsts.MILLIHOUR*24, "24:00");
 			mRenderer[i].setShowLegend(false);
 			mRenderer[i].setShowAxes(false);
 			mRenderer[i].setShowGrid(false);

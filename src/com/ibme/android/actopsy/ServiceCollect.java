@@ -72,7 +72,7 @@ public class ServiceCollect extends Service implements
 	private ClassLight mLight;
 	private ClassLocation mLocation;
 	private ClassCallsTexts mCallsTexts;
-	private ClassProfile mProfile;
+	private ClassProfileAccelerometry mProfile;
 
 	@Override
 	public void onCreate() {
@@ -94,7 +94,7 @@ public class ServiceCollect extends Service implements
 		mAccelerometry.init(ts);
 		mLight = new ClassLight(this);
 		mLight.init(ts);
-		mProfile = new ClassProfile(this);
+		mProfile = new ClassProfileAccelerometry(this);
 		mProfile.init(ts);
 
 		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
