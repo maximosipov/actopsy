@@ -125,18 +125,8 @@ public class ClassProfileAccelerometry {
 				jvals.add(val);
 			}
 			// write out
-			fmt = new SimpleDateFormat("yyyy-MM-dd");
-			String name = new String("profile-activity-" + fmt.format(new Date(daynum)) + ".json");
-			File root = Environment.getExternalStorageDirectory();
-			File folder = new File(root, ClassConsts.FILES_ROOT);
-			File file = new File(folder, name);
-			try {
-				FileOutputStream stream = new FileOutputStream(file);
-				writeVals(stream, jvals);
-			} catch (IOException e) {
-				new ClassEvents(TAG, "ERROR", "Couldn't write " + name);
-			}
-			new ClassEvents(TAG, "INFO", "Converted " + profile + " to " + name);
+			new ClassEvents(TAG, "INFO", "Converting " + profile);
+			writeVals(daynum, jvals);
 		}
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putBoolean("updatedProfileV7", true);
@@ -147,18 +137,7 @@ public class ClassProfileAccelerometry {
 	public Values[] get(long ts)
 	{
 		ArrayList<Values> vals = new ArrayList<Values>();
-		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-		String name = new String("profile-activity-" + fmt.format(new Date(ts)) + ".json");
-		File root = Environment.getExternalStorageDirectory();
-		File folder = new File(root, ClassConsts.FILES_ROOT);
-		File file = new File(folder, name);
-		try {
-			FileInputStream stream = new FileInputStream(file);
-			vals = readVals(stream);
-		} catch (IOException e) {
-			new ClassEvents(TAG, "ERROR", "Couldn't read " + name);
-		}
-
+		vals = readVals(ts);
 		return vals.toArray(new Values[vals.size()]);
 	}
 
@@ -199,24 +178,9 @@ public class ClassProfileAccelerometry {
 			float z = params[0].getFloat("z");
 
 			// Update profile data
-			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-			String name = new String("profile-activity-" + fmt.format(new Date(time)) + ".json");
-			try {
-				File root = Environment.getExternalStorageDirectory();
-				File folder = new File(root, ClassConsts.FILES_ROOT);
-				File file = new File(folder, name);
-				try {
-					FileInputStream istream = new FileInputStream(file);
-					vals = readVals(istream);
-				} catch (Exception e) {
-					new ClassEvents(TAG, "ERROR", "Could not read profile " + name + ", resetting: " + e.getMessage());
-				}
-				FileOutputStream ostream = new FileOutputStream(file);
-				vals.add(new Values(time, x, y, z));
-				writeVals(ostream, vals);
-			} catch (Exception e) {
-				new ClassEvents(TAG, "ERROR", "Could not update profile " + name + " :" + e.getMessage());
-			}
+			vals = readVals(time);
+			vals.add(new Values(time, x, y, z));
+			writeVals(time, vals);
 
 			return null;
 		}
@@ -225,11 +189,17 @@ public class ClassProfileAccelerometry {
 	///////////////////////////////////////////////////////////////////////////
 	// JSON serialization support functions
 	///////////////////////////////////////////////////////////////////////////
-	private ArrayList<Values> readVals(InputStream in) {
-		Gson gson = new Gson();
+	private ArrayList<Values> readVals(long ts) {
 		ArrayList<Values> vals = new ArrayList<Values>();
+		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+		String name = new String("profile-activity-" + fmt.format(new Date(ts)) + ".json");
+		File root = Environment.getExternalStorageDirectory();
+		File folder = new File(root, ClassConsts.FILES_ROOT);
+		File file = new File(folder, name);
 		try {
-			JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+			FileInputStream stream = new FileInputStream(file);
+			Gson gson = new Gson();
+			JsonReader reader = new JsonReader(new InputStreamReader(stream, "UTF-8"));
 			reader.beginArray();
 			while (reader.hasNext()) {
 				Values v = gson.fromJson(reader, Values.class);
@@ -237,16 +207,22 @@ public class ClassProfileAccelerometry {
 			}
 			reader.endArray();
 			reader.close();
-		} catch (Exception e) {
-			new ClassEvents(TAG, "ERROR", "Could not read JSON profile: " + e.getMessage());
+		} catch (IOException e) {
+			new ClassEvents(TAG, "ERROR", "Couldn't read " + name);
 		}
 		return vals;
 	}
 
-	private void writeVals(OutputStream out, ArrayList<Values> vals) {
-		Gson gson = new Gson();
+	private void writeVals(long ts, ArrayList<Values> vals) {
+		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+		String name = new String("profile-activity-" + fmt.format(new Date(ts)) + ".json");
+		File root = Environment.getExternalStorageDirectory();
+		File folder = new File(root, ClassConsts.FILES_ROOT);
+		File file = new File(folder, name);
 		try {
-			JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
+			FileOutputStream stream = new FileOutputStream(file);
+			Gson gson = new Gson();
+			JsonWriter writer = new JsonWriter(new OutputStreamWriter(stream, "UTF-8"));
 			writer.setIndent("  ");
 			writer.beginArray();
 			for (Values v : vals) {
@@ -254,8 +230,8 @@ public class ClassProfileAccelerometry {
 			}
 			writer.endArray();
 			writer.close();
-		} catch (Exception e) {
-			new ClassEvents(TAG, "ERROR", "Could not write JSON profile: " + e.getMessage());
+		} catch (IOException e) {
+			new ClassEvents(TAG, "ERROR", "Couldn't write " + name);
 		}
 	}
 }
