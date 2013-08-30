@@ -157,6 +157,11 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			if (ni != null && ni.isConnected() && ni.getType() == ConnectivityManager.TYPE_WIFI) {
 				new ClassEvents(TAG, "INFO", "WiFi on");
 
+				// TODO: Testing only!!!
+				// File[] f = getFiles(".*json");
+				// new ClassEvents(TAG, "INFO", "Uploading TC " + f[0]);
+				// new TaskUploaderTC(context).execute(System.currentTimeMillis() - ClassConsts.MILLIDAY);
+
 				// Upload allowed, enabled and configured
 				if (mUpload && !mUploadDisabled && !TextUtils.isEmpty(mUserID) && !TextUtils.isEmpty(mUserPass)) {
 					new ClassEvents(TAG, "INFO", "Upload on");

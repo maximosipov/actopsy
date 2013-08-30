@@ -135,12 +135,12 @@ public class TaskUploaderIBME extends AsyncTask<File, Void, Void> {
 						files[i].delete();
 						new ClassEvents(TAG, "INFO", "Uploaded " + files[i].getName());
 					} else {
-						new ClassEvents(TAG, "ERROR", "Upload error: " + str);
+						new ClassEvents(TAG, "ERROR", "Upload IBME error: " + str);
 					}
 				}
 			}
 		} catch (Exception e) {
-			new ClassEvents(TAG, "ERROR", "Upload failed " + e.getMessage());
+			new ClassEvents(TAG, "ERROR", "Upload IBME failed " + e.getMessage());
 		}
 
 		return null;

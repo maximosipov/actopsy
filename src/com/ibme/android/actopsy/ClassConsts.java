@@ -31,6 +31,7 @@ package com.ibme.android.actopsy;
 
 public class ClassConsts {
 	public static final String FILES_ROOT = "/Android/data/com.ibme.android.actopsy/files/";
+	public static final String CACHE_ROOT = "/cache/";
 	public static final String PREFS_PRIVATE = "prefs-private";
 	public static final String DATEFMT = "yyyy-MM-dd HH:mm:ss.SSSZ";
 

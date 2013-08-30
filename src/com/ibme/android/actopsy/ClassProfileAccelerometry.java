@@ -225,29 +225,37 @@ public class ClassProfileAccelerometry {
 	///////////////////////////////////////////////////////////////////////////
 	// JSON serialization support functions
 	///////////////////////////////////////////////////////////////////////////
-	private ArrayList<Values> readVals(InputStream in) throws IOException {
+	private ArrayList<Values> readVals(InputStream in) {
 		Gson gson = new Gson();
-		JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
 		ArrayList<Values> vals = new ArrayList<Values>();
-		reader.beginArray();
-		while (reader.hasNext()) {
-			Values v = gson.fromJson(reader, Values.class);
-			vals.add(v);
+		try {
+			JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+			reader.beginArray();
+			while (reader.hasNext()) {
+				Values v = gson.fromJson(reader, Values.class);
+				vals.add(v);
+			}
+			reader.endArray();
+			reader.close();
+		} catch (Exception e) {
+			new ClassEvents(TAG, "ERROR", "Could not read JSON profile: " + e.getMessage());
 		}
-		reader.endArray();
-		reader.close();
 		return vals;
 	}
 
-	private void writeVals(OutputStream out, ArrayList<Values> vals) throws IOException {
+	private void writeVals(OutputStream out, ArrayList<Values> vals) {
 		Gson gson = new Gson();
-		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
-		writer.setIndent("  ");
-		writer.beginArray();
-		for (Values v : vals) {
-			gson.toJson(v, Values.class, writer);
+		try {
+			JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
+			writer.setIndent("  ");
+			writer.beginArray();
+			for (Values v : vals) {
+				gson.toJson(v, Values.class, writer);
+			}
+			writer.endArray();
+			writer.close();
+		} catch (Exception e) {
+			new ClassEvents(TAG, "ERROR", "Could not write JSON profile: " + e.getMessage());
 		}
-		writer.endArray();
-		writer.close();
 	}
 }

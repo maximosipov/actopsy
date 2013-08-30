@@ -73,6 +73,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 
 public class TaskUploaderTC extends AsyncTask<Long, Void, Void> {
@@ -120,6 +121,12 @@ public class TaskUploaderTC extends AsyncTask<Long, Void, Void> {
 	@Override
 	protected Void doInBackground(Long... days) {
 		try {
+			// android.os.Debug.waitForDebugger();
+
+			if (TextUtils.isEmpty(mUserID) || TextUtils.isEmpty(mUserIDTC) || TextUtils.isEmpty(mUserPassTC)) {
+				return null;
+			}
+
 			for (int i = 0; i < days.length; i ++) {
 				String tcid = mUserID.substring(2);
 				String hash = bin2hex(getHash(mUserIDTC + mUserPassTC));
@@ -133,7 +140,7 @@ public class TaskUploaderTC extends AsyncTask<Long, Void, Void> {
 				String jvals = gson.toJson(ovals);
 
 			    DefaultHttpClient httpclient = new DefaultHttpClient();
-				URL url = new URL("UPLOAD_TC_URL" + tcid + "/actigraphyresponses?apikey=" + tcid + "-" + hash);
+				URL url = new URL(ClassConsts.UPLOAD_TC_URL + tcid + "/actigraphyresponses?apikey=" + tcid + "-" + hash);
 			    HttpPut httpput = new HttpPut(url.toString());
 			    StringEntity entity = new StringEntity(jvals);
 			    entity.setContentType("application/json;charset=UTF-8");
@@ -141,16 +148,14 @@ public class TaskUploaderTC extends AsyncTask<Long, Void, Void> {
 			    httpput.setEntity(entity); 
 
 				HttpResponse response = httpclient.execute(httpput);
-				HttpEntity rsp = response.getEntity();
-				if (rsp != null) {
+				if (response.getStatusLine().getStatusCode() != 200 && response.getStatusLine().getStatusCode() != 201) {
+					HttpEntity rsp = response.getEntity();
 					String str = EntityUtils.toString(rsp);
-					if (!str.matches("^OK(?s).*")) {
-						new ClassEvents(TAG, "ERROR", "Upload error: " + str);
-					}
+					new ClassEvents(TAG, "ERROR", "Upload TC error: " + str);
 				}
 			}
 		} catch (Exception e) {
-			new ClassEvents(TAG, "ERROR", "Upload failed " + e.getMessage());
+			new ClassEvents(TAG, "ERROR", "Upload TC failed " + e.getMessage());
 		}
 
 		return null;
