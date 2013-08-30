@@ -160,7 +160,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 				// TODO: Testing only!!!
 				// File[] f = getFiles(".*json");
 				// new ClassEvents(TAG, "INFO", "Uploading TC " + f[0]);
-				// new TaskUploaderTC(context).execute(System.currentTimeMillis() - ClassConsts.MILLIDAY);
+				// new TaskUploaderTC(context).execute(System.currentTimeMillis());
 
 				// Upload allowed, enabled and configured
 				if (mUpload && !mUploadDisabled && !TextUtils.isEmpty(mUserID) && !TextUtils.isEmpty(mUserPass)) {
