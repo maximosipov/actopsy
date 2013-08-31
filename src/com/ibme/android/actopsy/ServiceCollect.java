@@ -52,7 +52,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Process;
-import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 
 // In order to start the service the application should run from the phone memory 

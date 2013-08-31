@@ -32,7 +32,12 @@ package com.ibme.android.actopsy;
 import com.ibme.android.actopsy.R;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import android.app.AlarmManager;
@@ -114,7 +119,6 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			if (root.canRead()){
 				File folder = new File(root, ClassConsts.FILES_ROOT);
 				if (folder.exists()) {
-					// Build list of zip files from sdcard
 					names = folder.listFiles(new FilenameFilter() {
 						public boolean accept(File dir, String name) {
 							return name.toLowerCase().matches(mask);
@@ -194,7 +198,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 
 			// Delete old files
 			files = getFiles(".*");
-			for (int i = 0; i < files.length; i ++) {
+			for (int i = 0; i < files.length; i++) {
 				long age = files[i].lastModified();
 				if (age + mDeleteAge < now) {
 					if (files[i].delete()) {
@@ -207,10 +211,31 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 
 			// Archive files older then 2 days 
 			files = getFiles(".*csv$");
-			for (int i = 0; i < files.length; i ++) {
+			for (int i = 0; i < files.length; i++) {
 				long age = files[i].lastModified();
 				if (age + 2*ClassConsts.MILLIDAY < now) {
 					new TaskZipper().execute(files[i].getName());
+				}
+			}
+
+			// Prepare profiles for upload
+			files = new ClassProfileAccelerometry(context).getUploads();
+			for (int i = 0; i < files.length; i++) {
+				File root = Environment.getExternalStorageDirectory();
+				File folder = new File(root, ClassConsts.FILES_ROOT);
+				File dst = new File(folder, files[i].getName());
+				try {
+					InputStream in = new FileInputStream(files[i]);
+				    OutputStream out = new FileOutputStream(dst);
+				    int len;
+				    byte[] buf = new byte[ClassConsts.BUFFER_SIZE];
+				    while ((len = in.read(buf)) > 0) {
+				        out.write(buf, 0, len);
+				    }
+				    in.close();
+				    out.close();
+				} catch (IOException e) {
+					new ClassEvents(TAG, "ERROR", "Couldn't copy " + dst.getAbsolutePath());
 				}
 			}
 

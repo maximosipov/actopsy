@@ -32,15 +32,13 @@ package com.ibme.android.actopsy;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import com.google.gson.Gson;
@@ -51,7 +49,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 
 public class ClassProfileAccelerometry {
 
@@ -83,7 +80,21 @@ public class ClassProfileAccelerometry {
 
 	public void init(long ts)
 	{
-		convert(ts);
+		// TODO: Fix it to check and wait for storage
+		try {
+			File root = mContext.getFilesDir();
+			if (!root.exists()) {
+				root.mkdirs();
+			}
+			if (root.canWrite()){
+				File folder = new File(root, ClassConsts.CACHE_ROOT);
+				if (!folder.exists()) {
+					folder.mkdirs();
+				}
+			}
+		} catch (Exception e) {
+			new ClassEvents(TAG, "ERROR", "Could not open file " + e.getMessage());
+		}
 		mPeriodLimit =  ((long)ts/MILLIPERIOD)*MILLIPERIOD + MILLIPERIOD;
 		mPeriodSumX = 0;
 		mPeriodSumY = 0;
@@ -168,6 +179,59 @@ public class ClassProfileAccelerometry {
 		}
 	}
 
+	// Get profiles ready for upload
+	public File[] getUploads()
+	{
+		File[] files = new File[0];
+		File root = mContext.getFilesDir();
+		File folder = new File(root, ClassConsts.CACHE_ROOT);
+		long now = System.currentTimeMillis();
+
+		// First, remove old files (yes - hack, I know)
+		files = folder.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.toLowerCase().matches(".*");
+			}
+		});
+		for (int i = 0; i < files.length; i++) {
+			long age = files[i].lastModified();
+			// TODO: change 10 to proper consts definition
+			if (age + 10*ClassConsts.MILLIDAY < now) {
+				if (files[i].delete()) {
+					new ClassEvents(TAG, "INFO", "Deleted " + files[i].getAbsolutePath());
+				} else {
+					new ClassEvents(TAG, "ERROR", "Delete failed " + files[i].getAbsolutePath());
+				}
+			}
+		}
+
+		// Now prepare list of not uploaded files and tag as uploaded
+		ArrayList<File> uploads = new ArrayList<File>();
+		files = folder.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.toLowerCase().matches(".*json$");
+			}
+		});
+		for (int i = 0; i < files.length; i++) {
+			long age = files[i].lastModified();
+			// At least 1 day old files
+			if (age + 1*ClassConsts.MILLIDAY < now) {
+				File uploaded = new File(files[i].getAbsolutePath() + ".uploaded");
+				if (!uploaded.exists()) {
+					try {
+						uploaded.createNewFile();
+						uploads.add(files[i]);
+					} catch (IOException e) {
+						new ClassEvents(TAG, "ERROR", "Couldn't create " + uploaded.getAbsolutePath());
+					}
+				}
+			}
+		}
+
+		return uploads.toArray(new File[uploads.size()]);
+	}
+
+
 	private class UpdaterTask extends AsyncTask<Bundle, Void, Void> {
 		@Override
 		protected Void doInBackground(Bundle... params) {
@@ -193,8 +257,8 @@ public class ClassProfileAccelerometry {
 		ArrayList<Values> vals = new ArrayList<Values>();
 		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
 		String name = new String("profile-activity-" + fmt.format(new Date(ts)) + ".json");
-		File root = Environment.getExternalStorageDirectory();
-		File folder = new File(root, ClassConsts.FILES_ROOT);
+		File root = mContext.getFilesDir();
+		File folder = new File(root, ClassConsts.CACHE_ROOT);
 		File file = new File(folder, name);
 		try {
 			FileInputStream stream = new FileInputStream(file);
@@ -216,8 +280,8 @@ public class ClassProfileAccelerometry {
 	private void writeVals(long ts, ArrayList<Values> vals) {
 		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
 		String name = new String("profile-activity-" + fmt.format(new Date(ts)) + ".json");
-		File root = Environment.getExternalStorageDirectory();
-		File folder = new File(root, ClassConsts.FILES_ROOT);
+		File root = mContext.getFilesDir();
+		File folder = new File(root, ClassConsts.CACHE_ROOT);
 		File file = new File(folder, name);
 		try {
 			FileOutputStream stream = new FileOutputStream(file);
