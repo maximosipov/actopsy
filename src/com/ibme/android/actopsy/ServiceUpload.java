@@ -31,13 +31,17 @@ package com.ibme.android.actopsy;
 
 import com.ibme.android.actopsy.R;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 import android.app.AlarmManager;
@@ -161,11 +165,6 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			if (ni != null && ni.isConnected() && ni.getType() == ConnectivityManager.TYPE_WIFI) {
 				new ClassEvents(TAG, "INFO", "WiFi on");
 
-				// TODO: Testing only!!!
-				// File[] f = getFiles(".*json");
-				// new ClassEvents(TAG, "INFO", "Uploading TC " + f[0]);
-				// new TaskUploaderTC(context).execute(System.currentTimeMillis());
-
 				// Upload allowed, enabled and configured
 				if (mUpload && !mUploadDisabled && !TextUtils.isEmpty(mUserID) && !TextUtils.isEmpty(mUserPass)) {
 					new ClassEvents(TAG, "INFO", "Upload on");
@@ -177,6 +176,12 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 					if (files != null) {
 						for (int i = 0; i < files.length; i++) {
 							new TaskUploaderIBME(context).execute(files[i]);
+						}
+					}
+					files = getFiles(".*json$");
+					if (files != null) {
+						for (int i = 0; i < files.length; i++) {
+							new TaskUploaderTC(context).execute(files[i]);
 						}
 					}
 				} else {
@@ -224,16 +229,39 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 				File root = Environment.getExternalStorageDirectory();
 				File folder = new File(root, ClassConsts.FILES_ROOT);
 				File dst = new File(folder, files[i].getName());
+				ArrayList<ClassProfileAccelerometry.Values> ivals = new ArrayList<ClassProfileAccelerometry.Values>();
+				ArrayList<TaskUploaderTC.Values> ovals = new ArrayList<TaskUploaderTC.Values>();
+				String tcid = mUserID.substring(2);
 				try {
-					InputStream in = new FileInputStream(files[i]);
-				    OutputStream out = new FileOutputStream(dst);
-				    int len;
-				    byte[] buf = new byte[ClassConsts.BUFFER_SIZE];
-				    while ((len = in.read(buf)) > 0) {
-				        out.write(buf, 0, len);
-				    }
-				    in.close();
-				    out.close();
+					// Read
+					FileInputStream istream = new FileInputStream(files[i]);
+					Gson gson = new Gson();
+					JsonReader reader = new JsonReader(new InputStreamReader(istream, "UTF-8"));
+					reader.beginArray();
+					while (reader.hasNext()) {
+						ClassProfileAccelerometry.Values v = gson.fromJson(reader, ClassProfileAccelerometry.Values.class);
+						ivals.add(v);
+					}
+					reader.endArray();
+					reader.close();
+
+					// Convert
+					for (ClassProfileAccelerometry.Values v : ivals) {
+						ovals.add(new TaskUploaderTC.Values(tcid, v.t, v.x, v.y, v.z));
+					}
+
+					// Write
+					FileOutputStream ostream = new FileOutputStream(dst);
+					gson = new Gson();
+					JsonWriter writer = new JsonWriter(new OutputStreamWriter(ostream, "UTF-8"));
+					writer.setIndent(" ");
+					writer.beginArray();
+					for (TaskUploaderTC.Values v : ovals) {
+						gson.toJson(v, TaskUploaderTC.Values.class, writer);
+					}
+					writer.endArray();
+					writer.close();
+
 				} catch (IOException e) {
 					new ClassEvents(TAG, "ERROR", "Couldn't copy " + dst.getAbsolutePath());
 				}

@@ -29,45 +29,28 @@
 
 package com.ibme.android.actopsy;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonWriter;
 import com.ibme.android.actopsy.R;
-import com.ibme.android.actopsy.ClassProfileAccelerometry.Values;
+
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.URL;
-import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.json.JSONArray;
-import org.json.JSONStringer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -76,11 +59,11 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 
-public class TaskUploaderTC extends AsyncTask<Long, Void, Void> {
+public class TaskUploaderTC extends AsyncTask<File, Void, Void> {
 
 	private static final String TAG = "ActopsyTaskUploaderTC";
 
-	public class Values {
+	static public class Values {
 		public String participant_id;
 		public long response_date;
 		public float X;
@@ -119,7 +102,7 @@ public class TaskUploaderTC extends AsyncTask<Long, Void, Void> {
 	}
 
 	@Override
-	protected Void doInBackground(Long... days) {
+	protected Void doInBackground(File... files) {
 		try {
 			// android.os.Debug.waitForDebugger();
 
@@ -127,17 +110,23 @@ public class TaskUploaderTC extends AsyncTask<Long, Void, Void> {
 				return null;
 			}
 
-			for (int i = 0; i < days.length; i ++) {
+			for (int i = 0; i < files.length; i ++) {
 				String tcid = mUserID.substring(2);
 				String hash = bin2hex(getHash(mUserIDTC + mUserPassTC));
 
-				ClassProfileAccelerometry.Values[] ivals = new ClassProfileAccelerometry(context).get(days[i].longValue());
-				ArrayList<Values> ovals = new ArrayList<Values>();
-				for(int j=0; j<ivals.length; j++) {
-					ovals.add(new Values(tcid, ivals[j].t, ivals[j].x, ivals[j].y, ivals[j].z));
-				}
+				// TODO: I guess it may be optimized by pushing file directly instead of reading JSON in
+				ArrayList<Values> vals = new ArrayList<Values>();
+				FileInputStream stream = new FileInputStream(files[i]);
 				Gson gson = new Gson();
-				String jvals = gson.toJson(ovals);
+				JsonReader reader = new JsonReader(new InputStreamReader(stream, "UTF-8"));
+				reader.beginArray();
+				while (reader.hasNext()) {
+					Values v = gson.fromJson(reader, Values.class);
+					vals.add(v);
+				}
+				reader.endArray();
+				reader.close();
+				String jvals = gson.toJson(vals);
 
 			    DefaultHttpClient httpclient = new DefaultHttpClient();
 				URL url = new URL(ClassConsts.UPLOAD_TC_URL + tcid + "/actigraphyresponses?apikey=" + tcid + "-" + hash);
@@ -148,7 +137,10 @@ public class TaskUploaderTC extends AsyncTask<Long, Void, Void> {
 			    httpput.setEntity(entity); 
 
 				HttpResponse response = httpclient.execute(httpput);
-				if (response.getStatusLine().getStatusCode() != 200 && response.getStatusLine().getStatusCode() != 201) {
+				if (response.getStatusLine().getStatusCode() == 200 || response.getStatusLine().getStatusCode() == 201) {
+					files[i].delete();
+					new ClassEvents(TAG, "INFO", "Uploaded " + files[i].getName());
+				} else {
 					HttpEntity rsp = response.getEntity();
 					String str = EntityUtils.toString(rsp);
 					new ClassEvents(TAG, "ERROR", "Upload TC error: " + str);

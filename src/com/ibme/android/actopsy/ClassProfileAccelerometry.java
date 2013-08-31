@@ -58,7 +58,7 @@ public class ClassProfileAccelerometry {
 	public static final int LENGTH = 24*60;		// 1 minutes intervals
 	public static final long MILLIPERIOD = ClassConsts.MILLIDAY/LENGTH;
 
-	public class Values {
+	static public class Values {
 		public long t;
 		public float x;
 		public float y;
