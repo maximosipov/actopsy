@@ -46,9 +46,7 @@ public class ClassConsts {
 
 	public static final String UPLOAD_ALARM = "com.ibme.android.actopsy.UploadService.AlarmReceiver";
 	public static final long UPLOAD_PERIOD = 24*60*60*1000L;	// 24 hours
-	public static final String UPLOAD_URL = "https://ibme-web7.eng.ox.ac.uk/upload.php";
 	public static final String UPLOAD_SIZE = "10000000"; // 10MB
-	public static final String UPLOAD_TC_URL = "https://truecolours.nhs.uk/apps/demo/en/api/participants/";
 
 	public static final int BUFFER_SIZE = 8192;
 }

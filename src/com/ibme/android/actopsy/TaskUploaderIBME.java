@@ -68,12 +68,14 @@ public class TaskUploaderIBME extends AsyncTask<File, Void, Void> {
 	final Context context;
 	private String mUserID;
 	private String mUserPass;
+	private String mServerRaw;
 
 	TaskUploaderIBME(Context context) {
 		this.context = context;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		mUserID = prefs.getString("editUserID", "");
 		mUserPass = prefs.getString("editUserPass", "");
+		mServerRaw = prefs.getString("editServerRaw", "");
 	}
 
 	public class MyHttpClient extends DefaultHttpClient {
@@ -113,7 +115,7 @@ public class TaskUploaderIBME extends AsyncTask<File, Void, Void> {
 		try {
 			// android.os.Debug.waitForDebugger();
 
-			if (TextUtils.isEmpty(mUserID) || TextUtils.isEmpty(mUserPass)) {
+			if (TextUtils.isEmpty(mUserID) || TextUtils.isEmpty(mUserPass) || TextUtils.isEmpty(mServerRaw)) {
 				return null;
 			}
 
@@ -123,7 +125,7 @@ public class TaskUploaderIBME extends AsyncTask<File, Void, Void> {
 						new UsernamePasswordCredentials(mUserID, mUserPass));
 				MyHttpClient httpclient = new MyHttpClient(context);
 				httpclient.setCredentialsProvider(cp);
-				HttpPost httppost = new HttpPost(ClassConsts.UPLOAD_URL);
+				HttpPost httppost = new HttpPost(mServerRaw);
 
 				// Prepare HTTP request
 				MultipartEntity entity = new MultipartEntity();

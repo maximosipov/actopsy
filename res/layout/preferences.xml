@@ -115,4 +115,21 @@
             android:title="Local storage (days)" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/pref_server" >
+
+        <EditTextPreference
+            android:name="@string/pref_server_raw_name"
+            android:defaultValue="https://ibme-web7.eng.ox.ac.uk/upload.php"
+            android:key="editServerRaw"
+            android:summary="@string/pref_server_raw_summary"
+            android:title="@string/pref_server_raw_name" />
+
+        <EditTextPreference
+            android:name="@string/pref_server_tc_name"
+            android:defaultValue="https://truecolours.nhs.uk/apps/demo/en/api/participants/"
+            android:key="editServerTC"
+            android:summary="@string/pref_server_tc_summary"
+            android:title="@string/pref_server_tc_name" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

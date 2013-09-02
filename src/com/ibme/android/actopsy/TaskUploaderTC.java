@@ -77,6 +77,7 @@ public class TaskUploaderTC extends AsyncTask<File, Void, Void> {
 	private String mUserID;
 	private String mUserIDTC;
 	private String mUserPassTC;
+	private String mServerTC;
 
 	TaskUploaderTC(Context context) {
 		this.context = context;
@@ -84,6 +85,7 @@ public class TaskUploaderTC extends AsyncTask<File, Void, Void> {
 		mUserID = prefs.getString("editUserID", "");
 		mUserIDTC = prefs.getString("editUserIDTC", "");
 		mUserPassTC = prefs.getString("editUserPassTC", "");
+		mServerTC = prefs.getString("editServerTC", "");
 	}
 
 	public byte[] getHash(String password) {
@@ -106,7 +108,7 @@ public class TaskUploaderTC extends AsyncTask<File, Void, Void> {
 		try {
 			// android.os.Debug.waitForDebugger();
 
-			if (TextUtils.isEmpty(mUserID) || TextUtils.isEmpty(mUserIDTC) || TextUtils.isEmpty(mUserPassTC)) {
+			if (TextUtils.isEmpty(mUserID) || TextUtils.isEmpty(mUserIDTC) || TextUtils.isEmpty(mUserPassTC) || TextUtils.isEmpty(mServerTC)) {
 				return null;
 			}
 
@@ -129,7 +131,7 @@ public class TaskUploaderTC extends AsyncTask<File, Void, Void> {
 				String jvals = gson.toJson(vals);
 
 			    DefaultHttpClient httpclient = new DefaultHttpClient();
-				URL url = new URL(ClassConsts.UPLOAD_TC_URL + tcid + "/actigraphyresponses?apikey=" + tcid + "-" + hash);
+				URL url = new URL(mServerTC + tcid + "/actigraphyresponses?apikey=" + tcid + "-" + hash);
 			    HttpPut httpput = new HttpPut(url.toString());
 			    StringEntity entity = new StringEntity(jvals);
 			    entity.setContentType("application/json;charset=UTF-8");
