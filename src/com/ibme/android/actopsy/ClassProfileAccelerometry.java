@@ -196,7 +196,7 @@ public class ClassProfileAccelerometry {
 		for (int i = 0; i < files.length; i++) {
 			long age = files[i].lastModified();
 			// TODO: change 10 to proper consts definition
-			if (age + 10*ClassConsts.MILLIDAY < now) {
+			if ((age > 0) && (age + 10*ClassConsts.MILLIDAY < now)) {
 				if (files[i].delete()) {
 					new ClassEvents(TAG, "INFO", "Deleted " + files[i].getAbsolutePath());
 				} else {
@@ -215,7 +215,7 @@ public class ClassProfileAccelerometry {
 		for (int i = 0; i < files.length; i++) {
 			long age = files[i].lastModified();
 			// At least 1 day old files
-			if (age + 1*ClassConsts.MILLIDAY < now) {
+			if ((age > 0) && (age + 1*ClassConsts.MILLIDAY < now)) {
 				File uploaded = new File(files[i].getAbsolutePath() + ".uploaded");
 				if (!uploaded.exists()) {
 					try {

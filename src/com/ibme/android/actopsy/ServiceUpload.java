@@ -204,7 +204,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			files = getFiles(".*");
 			for (int i = 0; i < files.length; i++) {
 				long age = files[i].lastModified();
-				if (age + mDeleteAge < now) {
+				if ((age > 0) && (age + mDeleteAge < now)) {
 					if (files[i].delete()) {
 						new ClassEvents(TAG, "INFO", "Deleted " + files[i].getName());
 					} else {
@@ -217,8 +217,8 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			files = getFiles(".*csv$");
 			for (int i = 0; i < files.length; i++) {
 				long age = files[i].lastModified();
-				if (age + 2*ClassConsts.MILLIDAY < now) {
-					new TaskZipper().execute(files[i].getName());
+				if ((age > 0) && (age + 2*ClassConsts.MILLIDAY < now)) {
+					new TaskZipper().execute(files[i]);
 				}
 			}
 

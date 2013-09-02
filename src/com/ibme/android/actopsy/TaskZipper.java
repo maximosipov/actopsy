@@ -40,41 +40,33 @@ import java.util.zip.ZipOutputStream;
 import android.os.AsyncTask;
 import android.os.Environment;
 
-public class TaskZipper extends AsyncTask<String, Void, Void> {
+public class TaskZipper extends AsyncTask<File, Void, Void> {
 
 	private static final String TAG = "ActopsyTaskZipper";
 
 	@Override
-	protected Void doInBackground(String... files) {
+	protected Void doInBackground(File... files) {
 		try {
-			File root = Environment.getExternalStorageDirectory();
-			if (root.canWrite()) {
-				// Create folders
-				File folder = new File(root, ClassConsts.FILES_ROOT);
-				if (!folder.exists()) {
-					folder.mkdirs();
-				}
-				// Compress files
-				for (int i = 0; i < files.length; i++) {
-					File inf = new File(folder, files[i]);
-					BufferedInputStream ins = new BufferedInputStream(new FileInputStream(inf));
-					File outf = new File(folder, files[i] + ".zip");
-					ZipOutputStream outs = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(outf)));
+			// Compress files
+			for (int i = 0; i < files.length; i++) {
+				File inf = files[i];
+				BufferedInputStream ins = new BufferedInputStream(new FileInputStream(inf));
+				File outf = new File(files[i].getAbsolutePath() + ".zip");
+				ZipOutputStream outs = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(outf)));
 
-					// Compress data
-					ZipEntry entry = new ZipEntry(inf.getName());
-					outs.putNextEntry(entry);
-					byte data[] = new byte[ClassConsts.BUFFER_SIZE];
-					int count;
-					while ((count = ins.read(data, 0, ClassConsts.BUFFER_SIZE)) != -1) { 
-						outs.write(data, 0, count); 
-					} 
-					ins.close();
-					outs.close();
-					// Remove uncompressed
-					inf.delete();
-					new ClassEvents(TAG, "INFO", "Zipped " + outf.getName());
+				// Compress data
+				ZipEntry entry = new ZipEntry(inf.getName());
+				outs.putNextEntry(entry);
+				byte data[] = new byte[ClassConsts.BUFFER_SIZE];
+				int count;
+				while ((count = ins.read(data, 0, ClassConsts.BUFFER_SIZE)) != -1) {
+					outs.write(data, 0, count);
 				}
+				ins.close();
+				outs.close();
+				// Remove uncompressed
+				inf.delete();
+				new ClassEvents(TAG, "INFO", "Zipped " + outf.getName());
 			}
 		} catch (Exception e) {
 			new ClassEvents(TAG, "ERROR", "Zipper failed " + e.getMessage());
