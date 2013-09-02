@@ -54,7 +54,6 @@ public class ClassProfileAccelerometry {
 
 	private static final String TAG = "ActopsyProfileAccelerometry";
 
-	public static final int LENGTH_V7 = 24*4;		// 15 minutes intervals (keep old value for convert)
 	public static final int LENGTH = 24*60;		// 1 minutes intervals
 	public static final long MILLIPERIOD = ClassConsts.MILLIDAY/LENGTH;
 
@@ -109,39 +108,6 @@ public class ClassProfileAccelerometry {
 		mPeriodSumY = 0;
 		mPeriodSumZ = 0;
 		mPeriodNum = 0;
-	}
-
-	// Convert from preferences profiles
-	public void convert(long ts)
-	{
-		SharedPreferences prefs = mContext.getSharedPreferences(
-		        ClassConsts.PREFS_PRIVATE, Context.MODE_PRIVATE);
-		if(prefs.getBoolean("updatedProfileV7", false))
-			return;
-
-		long offset = TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings();
-		for (int i=0; i<7; i++) {
-			long daynum = ts-i*ClassConsts.MILLIDAY;
-			ArrayList<Values> jvals = new ArrayList<Values>();
-			// read in and convert
-			SimpleDateFormat fmt = new SimpleDateFormat("EEE");
-			String profile = new String("profile-" + new String(fmt.format(new Date(daynum))));
-			SharedPreferences prof = mContext.getSharedPreferences(profile, Context.MODE_PRIVATE);
-			long dayoff = (ts/ClassConsts.MILLIDAY - i) * ClassConsts.MILLIDAY;
-			for(int j=0; j<LENGTH_V7; j++)
-			{
-				Values val = new Values(0, 0, 0, 0);
-				val.t = dayoff + offset + j*ClassConsts.MILLIDAY/LENGTH_V7;
-				val.x = (float) (prof.getFloat(Integer.toString(j) + "_C", 0) + ClassConsts.G);
-				jvals.add(val);
-			}
-			// write out
-			new ClassEvents(TAG, "INFO", "Converting " + profile);
-			writeVals(daynum, jvals);
-		}
-		SharedPreferences.Editor editor = prefs.edit();
-		editor.putBoolean("updatedProfileV7", true);
-		editor.commit();
 	}
 
 	// Get profile values for a numbered week day
