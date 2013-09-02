@@ -124,7 +124,7 @@ public class ClassLocation {
 		long today = ts/ClassConsts.MILLIDAY;
 		long yesterday = mTsPrev/ClassConsts.MILLIDAY;
 		if (today > yesterday) {
-			String f = mFile.getName();
+			File f = mFile;
 			fini();
 			new TaskZipper().execute(f);
 			init(ts);
