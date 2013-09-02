@@ -223,46 +223,47 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			}
 
 			// Prepare profiles for upload
-			files = new ClassProfileAccelerometry(context).getUploads();
-			for (int i = 0; i < files.length; i++) {
-				File root = Environment.getExternalStorageDirectory();
-				File folder = new File(root, ClassConsts.FILES_ROOT);
-				File dst = new File(folder, files[i].getName());
-				ArrayList<ClassProfileAccelerometry.Values> ivals = new ArrayList<ClassProfileAccelerometry.Values>();
-				ArrayList<TaskUploaderTC.Values> ovals = new ArrayList<TaskUploaderTC.Values>();
-				String tcid = mUserID.substring(2);
-				try {
-					// Read
-					FileInputStream istream = new FileInputStream(files[i]);
-					Gson gson = new Gson();
-					JsonReader reader = new JsonReader(new InputStreamReader(istream, "UTF-8"));
-					reader.beginArray();
-					while (reader.hasNext()) {
-						ClassProfileAccelerometry.Values v = gson.fromJson(reader, ClassProfileAccelerometry.Values.class);
-						ivals.add(v);
-					}
-					reader.endArray();
-					reader.close();
+			if (!TextUtils.isEmpty(mUserID)) {
+				files = new ClassProfileAccelerometry(context).getUploads();
+				for (int i = 0; i < files.length; i++) {
+					File root = Environment.getExternalStorageDirectory();
+					File folder = new File(root, ClassConsts.FILES_ROOT);
+					File dst = new File(folder, files[i].getName());
+					ArrayList<ClassProfileAccelerometry.Values> ivals = new ArrayList<ClassProfileAccelerometry.Values>();
+					ArrayList<TaskUploaderTC.Values> ovals = new ArrayList<TaskUploaderTC.Values>();
+					String tcid = mUserID.substring(2);
+					try {
+						// Read
+						FileInputStream istream = new FileInputStream(files[i]);
+						Gson gson = new Gson();
+						JsonReader reader = new JsonReader(new InputStreamReader(istream, "UTF-8"));
+						reader.beginArray();
+						while (reader.hasNext()) {
+							ClassProfileAccelerometry.Values v = gson.fromJson(reader, ClassProfileAccelerometry.Values.class);
+							ivals.add(v);
+						}
+						reader.endArray();
+						reader.close();
 
-					// Convert
-					for (ClassProfileAccelerometry.Values v : ivals) {
-						ovals.add(new TaskUploaderTC.Values(tcid, v.t, v.x, v.y, v.z));
-					}
+						// Convert
+						for (ClassProfileAccelerometry.Values v : ivals) {
+							ovals.add(new TaskUploaderTC.Values(tcid, v.t, v.x, v.y, v.z));
+						}
 
-					// Write
-					FileOutputStream ostream = new FileOutputStream(dst);
-					gson = new Gson();
-					JsonWriter writer = new JsonWriter(new OutputStreamWriter(ostream, "UTF-8"));
-					writer.setIndent(" ");
-					writer.beginArray();
-					for (TaskUploaderTC.Values v : ovals) {
-						gson.toJson(v, TaskUploaderTC.Values.class, writer);
+						// Write
+						FileOutputStream ostream = new FileOutputStream(dst);
+						gson = new Gson();
+						JsonWriter writer = new JsonWriter(new OutputStreamWriter(ostream, "UTF-8"));
+						writer.setIndent(" ");
+						writer.beginArray();
+						for (TaskUploaderTC.Values v : ovals) {
+							gson.toJson(v, TaskUploaderTC.Values.class, writer);
+						}
+						writer.endArray();
+						writer.close();
+					} catch (IOException e) {
+						new ClassEvents(TAG, "ERROR", "Couldn't copy " + dst.getAbsolutePath());
 					}
-					writer.endArray();
-					writer.close();
-
-				} catch (IOException e) {
-					new ClassEvents(TAG, "ERROR", "Couldn't copy " + dst.getAbsolutePath());
 				}
 			}
 

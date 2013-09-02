@@ -271,7 +271,7 @@ public class ClassProfileAccelerometry {
 			}
 			reader.endArray();
 			reader.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			new ClassEvents(TAG, "ERROR", "Couldn't read " + name);
 		}
 		return vals;
@@ -294,7 +294,7 @@ public class ClassProfileAccelerometry {
 			}
 			writer.endArray();
 			writer.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			new ClassEvents(TAG, "ERROR", "Couldn't write " + name);
 		}
 	}
