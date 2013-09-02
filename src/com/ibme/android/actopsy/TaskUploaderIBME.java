@@ -58,6 +58,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 
 public class TaskUploaderIBME extends AsyncTask<File, Void, Void> {
@@ -110,6 +111,12 @@ public class TaskUploaderIBME extends AsyncTask<File, Void, Void> {
 	@Override
 	protected Void doInBackground(File... files) {
 		try {
+			// android.os.Debug.waitForDebugger();
+
+			if (TextUtils.isEmpty(mUserID) || TextUtils.isEmpty(mUserPass)) {
+				return null;
+			}
+
 			for (int i = 0; i < files.length; i ++) {
 				CredentialsProvider cp = new BasicCredentialsProvider();
 				cp.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),

@@ -165,9 +165,8 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			if (ni != null && ni.isConnected() && ni.getType() == ConnectivityManager.TYPE_WIFI) {
 				new ClassEvents(TAG, "INFO", "WiFi on");
 
-				// Upload allowed, enabled and configured
-				if (mUpload && !mUploadDisabled && !TextUtils.isEmpty(mUserID) && !TextUtils.isEmpty(mUserPass)) {
-					new ClassEvents(TAG, "INFO", "Upload on");
+				// Upload enabled and allowed
+				if (mUpload && !mUploadDisabled) {
 					// We receive multiple identical CONNECTIVITY_CHANGE events and this leads
 					// to multiple upload attempts where only one is successful and others waste
 					// traffic. Temporary (for one hour) disabling uploads helps to prevent it.
