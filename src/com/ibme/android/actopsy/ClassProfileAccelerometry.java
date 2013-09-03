@@ -29,9 +29,12 @@
 
 package com.ibme.android.actopsy;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -62,8 +65,9 @@ public class ClassProfileAccelerometry {
 		public float x;
 		public float y;
 		public float z;
-		public Values(long time, float xv, float yv, float zv)
-			{ t = time; x = xv; y = yv; z = zv; }
+		public long n;
+		public Values(long time, float xv, float yv, float zv, long vn)
+			{ t = time; x = xv; y = yv; z = zv; n = vn; }
 	}
 
 	private long mPeriodLimit;
@@ -86,7 +90,7 @@ public class ClassProfileAccelerometry {
 				root.mkdirs();
 			}
 			if (root.canWrite()){
-				File folder = new File(root, ClassConsts.CACHE_ROOT);
+				File folder = new File(root, ClassConsts.PROFILES_ROOT);
 				if (!folder.exists()) {
 					folder.mkdirs();
 				}
@@ -114,7 +118,7 @@ public class ClassProfileAccelerometry {
 	public Values[] get(long ts)
 	{
 		ArrayList<Values> vals = new ArrayList<Values>();
-		vals = readVals(ts);
+		vals = readVals(getFile(ts));
 		return vals.toArray(new Values[vals.size()]);
 	}
 
@@ -130,6 +134,7 @@ public class ClassProfileAccelerometry {
 				params.putFloat("x", (float)(mPeriodSumX/mPeriodNum));
 				params.putFloat("y", (float)(mPeriodSumY/mPeriodNum));
 				params.putFloat("z", (float)(mPeriodSumZ/mPeriodNum));
+				params.putLong("n", mPeriodNum);
 				new UpdaterTask().execute(params);
 			}
 			mPeriodSumX = x;
@@ -150,7 +155,7 @@ public class ClassProfileAccelerometry {
 	{
 		File[] files = new File[0];
 		File root = mContext.getFilesDir();
-		File folder = new File(root, ClassConsts.CACHE_ROOT);
+		File folder = new File(root, ClassConsts.PROFILES_ROOT);
 		long now = System.currentTimeMillis();
 
 		// First, remove old files (yes - hack, I know)
@@ -206,62 +211,80 @@ public class ClassProfileAccelerometry {
 			float x = params[0].getFloat("x");
 			float y = params[0].getFloat("y");
 			float z = params[0].getFloat("z");
+			long n = params[0].getLong("n");
 
 			// Update profile data
-			vals = readVals(time);
-			vals.add(new Values(time, x, y, z));
-			writeVals(time, vals);
+			vals.add(new Values(time, x, y, z, n));
+			writeVals(getFile(time), vals);
 
 			return null;
 		}
 	}
 
 	///////////////////////////////////////////////////////////////////////////
-	// JSON serialization support functions
+	// Serialization support functions
 	///////////////////////////////////////////////////////////////////////////
-	private ArrayList<Values> readVals(long ts) {
+	public ArrayList<Values> readVals(File file) {
 		ArrayList<Values> vals = new ArrayList<Values>();
-		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-		String name = new String("profile-activity-" + fmt.format(new Date(ts)) + ".json");
-		File root = mContext.getFilesDir();
-		File folder = new File(root, ClassConsts.CACHE_ROOT);
-		File file = new File(folder, name);
+		FileInputStream stream;
+		BufferedReader reader;
+		// Do nothing if cannot open file
 		try {
-			FileInputStream stream = new FileInputStream(file);
-			Gson gson = new Gson();
-			JsonReader reader = new JsonReader(new InputStreamReader(stream, "UTF-8"));
-			reader.beginArray();
-			while (reader.hasNext()) {
-				Values v = gson.fromJson(reader, Values.class);
+			stream = new FileInputStream(file);
+			reader = new BufferedReader(new InputStreamReader(stream));
+		} catch (Exception e) {
+			return vals;
+		}
+		// Handle read errors
+		try {
+			String line = reader.readLine();
+			while (line != null) {
+				String[] str = line.split(",");
+				Values v = new Values(Long.parseLong(str[0]),
+						Float.parseFloat(str[1]),
+						Float.parseFloat(str[2]),
+						Float.parseFloat(str[3]),
+						Long.parseLong(str[4]));
 				vals.add(v);
+				line = reader.readLine();
 			}
-			reader.endArray();
 			reader.close();
 		} catch (Exception e) {
-			new ClassEvents(TAG, "ERROR", "Couldn't read " + name);
+			new ClassEvents(TAG, "ERROR", "Couldn't read " + file.getAbsolutePath());
+		} finally {
+			try {
+			    stream.close();
+			}
+			catch (IOException e) {
+				new ClassEvents(TAG, "ERROR", "Couldn't close " + file.getAbsolutePath());
+		    }
 		}
 		return vals;
 	}
 
-	private void writeVals(long ts, ArrayList<Values> vals) {
+	public void writeVals(File file, ArrayList<Values> vals) {
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+			for (Values v : vals) {
+				writer.write(Long.toString(v.t) +
+						"," + Float.toString(v.x) +
+						"," + Float.toString(v.y) +
+						"," + Float.toString(v.z) +
+						"," + Long.toString(v.n) +
+						"\n");
+			}
+			writer.close();
+		} catch (Exception e) {
+			new ClassEvents(TAG, "ERROR", "Couldn't write " + file.getAbsolutePath());
+		}
+	}
+
+	public File getFile(long ts) {
 		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
 		String name = new String("profile-activity-" + fmt.format(new Date(ts)) + ".json");
 		File root = mContext.getFilesDir();
-		File folder = new File(root, ClassConsts.CACHE_ROOT);
+		File folder = new File(root, ClassConsts.PROFILES_ROOT);
 		File file = new File(folder, name);
-		try {
-			FileOutputStream stream = new FileOutputStream(file);
-			Gson gson = new Gson();
-			JsonWriter writer = new JsonWriter(new OutputStreamWriter(stream, "UTF-8"));
-			writer.setIndent("  ");
-			writer.beginArray();
-			for (Values v : vals) {
-				gson.toJson(v, Values.class, writer);
-			}
-			writer.endArray();
-			writer.close();
-		} catch (Exception e) {
-			new ClassEvents(TAG, "ERROR", "Couldn't write " + name);
-		}
+		return file;
 	}
 }

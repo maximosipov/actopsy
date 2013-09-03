@@ -234,16 +234,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 					String tcid = mUserID.substring(2);
 					try {
 						// Read
-						FileInputStream istream = new FileInputStream(files[i]);
-						Gson gson = new Gson();
-						JsonReader reader = new JsonReader(new InputStreamReader(istream, "UTF-8"));
-						reader.beginArray();
-						while (reader.hasNext()) {
-							ClassProfileAccelerometry.Values v = gson.fromJson(reader, ClassProfileAccelerometry.Values.class);
-							ivals.add(v);
-						}
-						reader.endArray();
-						reader.close();
+						ivals = new ClassProfileAccelerometry(context).readVals(files[i]);
 
 						// Convert
 						for (ClassProfileAccelerometry.Values v : ivals) {
@@ -252,7 +243,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 
 						// Write
 						FileOutputStream ostream = new FileOutputStream(dst);
-						gson = new Gson();
+						Gson gson = new Gson();
 						JsonWriter writer = new JsonWriter(new OutputStreamWriter(ostream, "UTF-8"));
 						writer.setIndent(" ");
 						writer.beginArray();
