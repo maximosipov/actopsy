@@ -66,12 +66,13 @@ public class ClassProfileAccelerometry {
 		public float y;
 		public float z;
 		public long n;
-		public Values(long time, float xv, float yv, float zv, long vn)
-			{ t = time; x = xv; y = yv; z = zv; n = vn; }
+		public float l;
+		public Values(long time, float xv, float yv, float zv, long vn, float lv)
+			{ t = time; x = xv; y = yv; z = zv; n = vn; l = lv; }
 	}
 
 	private long mPeriodLimit;
-	private double mPeriodSumX, mPeriodSumY, mPeriodSumZ;
+	private double mPeriodSumX, mPeriodSumY, mPeriodSumZ, mPeriodSumL;
 	private long mPeriodNum;
 
 	private Context mContext;
@@ -102,6 +103,7 @@ public class ClassProfileAccelerometry {
 		mPeriodSumX = 0;
 		mPeriodSumY = 0;
 		mPeriodSumZ = 0;
+		mPeriodSumL = 0;
 		mPeriodNum = 0;
 	}
 
@@ -111,6 +113,7 @@ public class ClassProfileAccelerometry {
 		mPeriodSumX = 0;
 		mPeriodSumY = 0;
 		mPeriodSumZ = 0;
+		mPeriodSumL = 0;
 		mPeriodNum = 0;
 	}
 
@@ -134,18 +137,21 @@ public class ClassProfileAccelerometry {
 				params.putFloat("x", (float)(mPeriodSumX/mPeriodNum));
 				params.putFloat("y", (float)(mPeriodSumY/mPeriodNum));
 				params.putFloat("z", (float)(mPeriodSumZ/mPeriodNum));
+				params.putFloat("l", (float)(mPeriodSumL/mPeriodNum));
 				params.putLong("n", mPeriodNum);
 				new UpdaterTask().execute(params);
 			}
 			mPeriodSumX = x;
 			mPeriodSumY = y;
 			mPeriodSumZ = z;
+			mPeriodSumL = Math.abs(Math.sqrt(x*x + y*y + z*z) - ClassConsts.G);
 			mPeriodNum = 1;
 			mPeriodLimit = ((long)ts/MILLIPERIOD)*MILLIPERIOD + MILLIPERIOD;
 		} else {
 			mPeriodSumX += Math.abs(x);
 			mPeriodSumY += Math.abs(y);
 			mPeriodSumZ += Math.abs(z);
+			mPeriodSumL += Math.abs(Math.sqrt(x*x + y*y + z*z) - ClassConsts.G);
 			mPeriodNum ++;
 		}
 	}
@@ -211,10 +217,11 @@ public class ClassProfileAccelerometry {
 			float x = params[0].getFloat("x");
 			float y = params[0].getFloat("y");
 			float z = params[0].getFloat("z");
+			float l = params[0].getFloat("l");
 			long n = params[0].getLong("n");
 
 			// Update profile data
-			vals.add(new Values(time, x, y, z, n));
+			vals.add(new Values(time, x, y, z, n, l));
 			writeVals(getFile(time), vals);
 
 			return null;
@@ -240,11 +247,20 @@ public class ClassProfileAccelerometry {
 			String line = reader.readLine();
 			while (line != null) {
 				String[] str = line.split(",");
-				Values v = new Values(Long.parseLong(str[0]),
-						Float.parseFloat(str[1]),
-						Float.parseFloat(str[2]),
-						Float.parseFloat(str[3]),
-						Long.parseLong(str[4]));
+				long t, n;
+				float x, y, z, l;
+				Values v;
+				t = Long.parseLong(str[0]);
+				x = Float.parseFloat(str[1]);
+				y = Float.parseFloat(str[2]);
+				z = Float.parseFloat(str[3]);
+				n = Long.parseLong(str[4]);
+				if (str.length > 5) {
+					l = Float.parseFloat(str[5]);
+				} else {
+					l = (float)Math.abs(Math.sqrt(x*x + y*y + z*z) - ClassConsts.G);
+				}
+				v = new Values(t, x, y, z, n, l);
 				vals.add(v);
 				line = reader.readLine();
 			}
@@ -271,6 +287,7 @@ public class ClassProfileAccelerometry {
 						"," + Float.toString(v.y) +
 						"," + Float.toString(v.z) +
 						"," + Long.toString(v.n) +
+						"," + Float.toString(v.l) +
 						"\n");
 			}
 			writer.close();

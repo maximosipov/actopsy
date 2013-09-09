@@ -253,7 +253,7 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 			ClassProfileAccelerometry.Values[] vals = new ClassProfileAccelerometry(this).get(daynum);
 			for(int j=0; j<vals.length; j++) {
 				long t = (vals[j].t + offset) % ClassConsts.MILLIDAY;
-				double v = Math.abs(Math.sqrt(vals[j].x*vals[j].x + vals[j].y*vals[j].y + vals[j].z*vals[j].z) - ClassConsts.G);
+				double v = vals[j].l;
 				mActSeries[i].add(t, v);
 			}
 			// reference (light?) profile
