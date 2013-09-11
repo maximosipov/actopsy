@@ -238,7 +238,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 
 						// Convert
 						for (ClassProfileAccelerometry.Values v : ivals) {
-							ovals.add(new TaskUploaderTC.Values(tcid, v.t, v.x, v.y, v.z));
+							ovals.add(new TaskUploaderTC.Values(tcid, v.t, v.l));
 						}
 
 						// Write

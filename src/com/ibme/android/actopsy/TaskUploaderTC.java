@@ -66,11 +66,9 @@ public class TaskUploaderTC extends AsyncTask<File, Void, Void> {
 	static public class Values {
 		public String participant_id;
 		public long response_date;
-		public float X;
-		public float Y;
-		public float Z;
-		public Values(String id, long time, float x, float y, float z)
-			{ participant_id = id; response_date = time; X = x; Y = y; Z = z; }
+		public float L;
+		public Values(String id, long time, float l)
+			{ participant_id = id; response_date = time; L = l; }
 	}
 
 	final Context context;
