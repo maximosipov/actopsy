@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import android.content.Context;
 import android.os.Environment;
@@ -71,6 +72,7 @@ public class ClassLight {
 				}
 				// Initialise the main light file
 				SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+				fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
 				mFile = new File(folder, "light-" + fmt.format(new Date(ts)) + ".csv");
 				mWriter = new BufferedWriter(new FileWriter(mFile, true));
 			} else {

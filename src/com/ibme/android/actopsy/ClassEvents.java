@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import android.os.Environment;
 import android.util.Log;
@@ -55,6 +56,7 @@ public class ClassEvents {
 				}
 				// Initialise events file
 				SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+				fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
 				File out = new File(folder, "events-" + fmt.format(new Date(ts)) + ".csv");
 				BufferedWriter writer = new BufferedWriter(new FileWriter(out, true));
 				// Write data and close events file 

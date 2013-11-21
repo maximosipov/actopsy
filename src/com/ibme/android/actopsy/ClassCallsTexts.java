@@ -42,6 +42,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -83,6 +84,7 @@ public class ClassCallsTexts {
 				}
 				// Initialise the main calls & texts file
 				SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+				fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
 				mFile = new File(folder, "calls-texts-" + fmt.format(new Date(ts)) + ".csv");
 				mWriter = new BufferedWriter(new FileWriter(mFile, true));
 			} else {
