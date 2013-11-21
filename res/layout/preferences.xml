@@ -43,6 +43,11 @@
             android:summary="@string/pref_pass_summary"
             android:title="@string/pref_pass_name" />
 
+		<Preference
+		    android:title="Click to check connection"
+			android:key="buttonCheck"
+			android:summary="Check user ID and password with the server"/>
+
         <EditTextPreference
             android:name="@string/pref_tc_id_name"
             android:defaultValue=""

@@ -85,6 +85,16 @@ public class ActivitySettings extends PreferenceActivity implements OnSharedPref
 		pref = findPreference("listSamplingRate");
 		pref.setSummary(((ListPreference)pref).getEntry());
 		pref.setEnabled(false);
+
+		pref = (Preference)findPreference("buttonCheck");
+		pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+			@Override
+			public boolean onPreferenceClick(Preference arg0) {
+				new ClassEvents(TAG, "INFO", "Checking server connection");
+				new TaskCheckerIBME(getApplicationContext()).execute();
+			    return true;
+			}
+		});
 	}
 
 	Preference.OnPreferenceChangeListener numberCheckListener = new Preference.OnPreferenceChangeListener() {
