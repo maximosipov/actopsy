@@ -32,12 +32,15 @@ package com.ibme.android.actopsy;
 import com.ibme.android.actopsy.R;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -45,6 +48,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -52,6 +56,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Process;
+import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 
 // In order to start the service the application should run from the phone memory 
@@ -83,8 +88,30 @@ public class ServiceCollect extends Service implements
 
 		// Values should match android definitions
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		Resources r = getResources();
+		String[] a;
+		String v;
+
+		a = r.getStringArray(R.array.samplingArray);
 		int sdelay = Integer.valueOf(prefs.getString("listSamplingRate", "3"));
-		new ClassEvents(TAG, "INFO", "Sampling rate " + sdelay);
+		v = a[sdelay];
+		new ClassEvents(TAG, "INFO", "Sampling rate: " + v);
+
+		a = r.getStringArray(R.array.usageArray);
+		v = a[Integer.valueOf(prefs.getString("listMobileUsage", "1"))];
+		new ClassEvents(TAG, "INFO", "Phone usage: " + v);
+
+		v = prefs.getString("editUserBday", "");
+		new ClassEvents(TAG, "INFO", "Birth year: " + v);
+
+		a = r.getStringArray(R.array.genderArray);
+		v = a[Integer.valueOf(prefs.getString("listUserGender", "1"))];
+		new ClassEvents(TAG, "INFO", "Gender: " + v);
+
+		a = r.getStringArray(R.array.statusArray);
+		v = a[Integer.valueOf(prefs.getString("listUserStatus", "1"))];
+		new ClassEvents(TAG, "INFO", "Occupation: " + v);
+
 		boolean loc = prefs.getBoolean("checkboxLocation", false);
 		boolean comm = prefs.getBoolean("checkboxComm", false);
 
@@ -96,9 +123,26 @@ public class ServiceCollect extends Service implements
 		mProfile = new ClassProfileAccelerometry(this);
 		mProfile.init(ts);
 
+		// Get phone model and android version
+		new ClassEvents(TAG, "INFO", "Phone: " + Build.MANUFACTURER + " " + Build.MODEL + " " + Build.VERSION.RELEASE);
+
+		// Get sensors
 		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		String str = "Sensors: ";
+		List<Sensor> lst = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+		Iterator<Sensor> itr = lst.iterator();
+		while (itr.hasNext()) {
+			str = str + ", " + itr.next().getName();
+		}
+		new ClassEvents(TAG, "INFO", str);
 		mSensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		new ClassEvents(TAG, "INFO", "AccelerometerType: " + mSensorAccelerometer.getName());
+		new ClassEvents(TAG, "INFO", "AccelerometerMax: " + mSensorAccelerometer.getMaximumRange());
+		new ClassEvents(TAG, "INFO", "AccelerometerResolution: " + mSensorAccelerometer.getResolution());
 		mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+		new ClassEvents(TAG, "INFO", "LightType: " + mSensorLight.getName());
+		new ClassEvents(TAG, "INFO", "LightMax: " + mSensorLight.getMaximumRange());
+		new ClassEvents(TAG, "INFO", "LightResolution: " + mSensorLight.getResolution());
 		mSensorManager.registerListener(this, mSensorAccelerometer, sdelay);
 		mSensorManager.registerListener(this, mSensorLight, sdelay);
 
@@ -215,7 +259,6 @@ public class ServiceCollect extends Service implements
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		// TODO: What's that?
-		new ClassEvents(TAG, "INFO", "Accuracy changed");
 	}
 
 	@Override
