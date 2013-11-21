@@ -86,8 +86,11 @@ public class ServiceCollect extends Service implements
 
 		// android.os.Debug.waitForDebugger();
 
-		// Values should match android definitions
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		if (!prefs.getBoolean("agreeOnTerms", false)) {
+			stopSelf();
+		}
+
 		Resources r = getResources();
 		String[] a;
 		String v;
