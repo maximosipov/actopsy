@@ -56,8 +56,6 @@ import android.os.RemoteException;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.annotation.TargetApi;
-import android.app.ActionBar.LayoutParams;
-import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -65,14 +63,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Color;
-import android.view.Display;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.WindowManager;
-import android.webkit.WebView;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 public class ActivityProfile extends SherlockActivity implements OnSharedPreferenceChangeListener {
 
@@ -92,43 +83,6 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 
 		// Initialize preferences
 		PreferenceManager.setDefaultValues(this, R.layout.preferences, false);
-		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-		boolean agree = prefs.getBoolean("agreeOnTerms", false);
-        if (!agree) {
-			final Dialog dialog = new Dialog(this);
-			dialog.setCancelable(false);
-			dialog.setContentView(R.layout.consent);
-			dialog.setTitle("Participant Consent Form");
-			WebView wv = (WebView)dialog.findViewById(R.id.webviewConsent);
-			wv.loadUrl("file:///android_asset/www/consent.html");
-			Button buttonAgree = (Button) dialog.findViewById(R.id.buttonAgree);
-			Button buttonNo = (Button) dialog.findViewById(R.id.buttonNo);
-			buttonAgree.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-		            prefs.edit().putBoolean("agreeOnTerms", true).commit();
-		    		Intent service = new Intent(getApplicationContext(), ServiceCollect.class);
-		    		startService(service);
-		    		service = new Intent(getApplicationContext(), ServiceUpload.class);
-		    		startService(service);
-		            dialog.dismiss();
-				}
-			});
-			buttonNo.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-		            dialog.dismiss();
-					finish();
-				}
-			});
-			WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-		    lp.copyFrom(dialog.getWindow().getAttributes());
-		    lp.width = WindowManager.LayoutParams.FILL_PARENT;
-		    lp.height = WindowManager.LayoutParams.FILL_PARENT;
-			dialog.show();
-			dialog.getWindow().setAttributes(lp);
-        }
 
 		// Start services
 		Intent service = new Intent(this, ServiceCollect.class);
