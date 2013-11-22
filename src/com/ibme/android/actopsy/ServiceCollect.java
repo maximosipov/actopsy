@@ -97,19 +97,20 @@ public class ServiceCollect extends Service implements
 		v = a[sdelay];
 		new ClassEvents(TAG, "INFO", "Sampling rate: " + v);
 
+		// WARNING: For arrays below indexing starts from 1, so subtract 1
 		a = r.getStringArray(R.array.usageArray);
-		v = a[Integer.valueOf(prefs.getString("listMobileUsage", "1"))];
+		v = a[Integer.valueOf(prefs.getString("listMobileUsage", "1")) - 1];
 		new ClassEvents(TAG, "INFO", "Phone usage: " + v);
 
 		v = prefs.getString("editUserBday", "");
 		new ClassEvents(TAG, "INFO", "Birth year: " + v);
 
 		a = r.getStringArray(R.array.genderArray);
-		v = a[Integer.valueOf(prefs.getString("listUserGender", "1"))];
+		v = a[Integer.valueOf(prefs.getString("listUserGender", "1")) - 1];
 		new ClassEvents(TAG, "INFO", "Gender: " + v);
 
 		a = r.getStringArray(R.array.statusArray);
-		v = a[Integer.valueOf(prefs.getString("listUserStatus", "1"))];
+		v = a[Integer.valueOf(prefs.getString("listUserStatus", "1")) - 1];
 		new ClassEvents(TAG, "INFO", "Occupation: " + v);
 
 		boolean loc = prefs.getBoolean("checkboxLocation", false);

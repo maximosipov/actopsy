@@ -33,7 +33,7 @@
 
     <string-array name="usageArray">
         <item>Pants pocket</item>
-        <item>Jacket poket</item>
+        <item>Jacket pocket</item>
         <item>Handbag</item>
     </string-array>
     <string-array name="usageValues">
