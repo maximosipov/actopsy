@@ -117,11 +117,14 @@ public class ClassProfileAccelerometry {
 		mPeriodNum = 0;
 	}
 
-	// Get profile values for a numbered week day
-	public Values[] get(long ts)
+	// Get profile values for a day identified by ts
+	public Values[] get(long ts_utc)
 	{
+		long ts_off = TimeZone.getDefault().getOffset(new Date().getTime());
+		long ts_local = ts_utc + ts_off;
+
 		ArrayList<Values> vals = new ArrayList<Values>();
-		vals = readVals(getFile(ts));
+		vals = readVals(getFile(ts_local));
 		return vals.toArray(new Values[vals.size()]);
 	}
 
@@ -131,9 +134,12 @@ public class ClassProfileAccelerometry {
 		// Detect profile period roll-over and save (average) data
 		if (ts > mPeriodLimit) {
 			if (mPeriodNum > 0) {
-				// Save averaged for all history profile data
+				// Save averaged for all history profile data with local timestamps
+				long ts_off = TimeZone.getDefault().getOffset(new Date().getTime());
+				long ts_local = mPeriodLimit + ts_off;
+
 				Bundle params = new Bundle();
-				params.putLong("time", mPeriodLimit);
+				params.putLong("time", ts_local);
 				params.putFloat("x", (float)(mPeriodSumX/mPeriodNum));
 				params.putFloat("y", (float)(mPeriodSumY/mPeriodNum));
 				params.putFloat("z", (float)(mPeriodSumZ/mPeriodNum));
@@ -296,9 +302,9 @@ public class ClassProfileAccelerometry {
 		}
 	}
 
-	public File getFile(long ts) {
+	private File getFile(long ts_local) {
 		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-		String name = new String("profile-activity-" + fmt.format(new Date(ts)) + ".json");
+		String name = new String("profile-activity-" + fmt.format(new Date(ts_local)) + ".json");
 		File root = mContext.getFilesDir();
 		File folder = new File(root, ClassConsts.PROFILES_ROOT);
 		File file = new File(folder, name);

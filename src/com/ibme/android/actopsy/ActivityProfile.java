@@ -239,7 +239,6 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 		SimpleDateFormat fmt = new SimpleDateFormat("EEE, dd-MMM");
 		for (int i=0; i<7; i++) {
 			long daynum = ts-i*ClassConsts.MILLIDAY;
-			long offset = TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings();
 			String daystr = new String(fmt.format(new Date(daynum)));
 
 			mDataset[i] = new XYMultipleSeriesDataset();
@@ -252,7 +251,7 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 			// activity profile
 			ClassProfileAccelerometry.Values[] vals = new ClassProfileAccelerometry(this).get(daynum);
 			for(int j=0; j<vals.length; j++) {
-				long t = (vals[j].t + offset) % ClassConsts.MILLIDAY;
+				long t = vals[j].t % ClassConsts.MILLIDAY;
 				double v = vals[j].l;
 				mActSeries[i].add(t, v);
 			}
