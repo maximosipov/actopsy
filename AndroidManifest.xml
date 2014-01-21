@@ -41,6 +41,10 @@
             android:label="@string/title_activity_quest_altman" >
         </activity>
         <activity
+            android:name="com.ibme.android.actopsy.ActivityQuestGAD"
+            android:label="@string/title_activity_quest_gad" >
+        </activity>
+        <activity
             android:name="com.ibme.android.actopsy.ActivitySettings"
             android:label="@string/title_activity_settings" >
         </activity>

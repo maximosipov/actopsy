@@ -9,6 +9,7 @@
     <string name="title_activity_profile">Actopsy</string>
     <string name="title_activity_quest_qids">Depression (QIDS-SR16)</string>
     <string name="title_activity_quest_altman">Mania (ASRM)</string>
+    <string name="title_activity_quest_gad">Anxiety (GAD-7)</string>
     <string name="title_activity_settings">Settings</string>
 
     <string name="menu_main">Profile</string>
@@ -287,6 +288,69 @@
 		<item>2. I have often been more active than usual</item>
 		<item>3. I have frequently been more active than usual</item>
 		<item>4. I am constantly active or on the go all the time</item>
+	</string-array>
+
+	<string name="spinner_gad1_name">1. Feeling nervous, anxious or on edge</string>
+	<string-array name="spinner_gad1_array">
+		<item>None selected (touch to answer)</item>
+		<item>0. Not at all</item>
+		<item>1. Several days</item>
+		<item>2. Over half the days</item>
+		<item>3. Nearly every day</item>
+	</string-array>
+
+	<string name="spinner_gad2_name">2. Not being able to stop or control worrying</string>
+	<string-array name="spinner_gad2_array">
+		<item>None selected (touch to answer)</item>
+		<item>0. Not at all</item>
+		<item>1. Several days</item>
+		<item>2. Over half the days</item>
+		<item>3. Nearly every day</item>
+	</string-array>
+
+	<string name="spinner_gad3_name">3. Worrying too much about different things</string>
+	<string-array name="spinner_gad3_array">
+		<item>None selected (touch to answer)</item>
+		<item>0. Not at all</item>
+		<item>1. Several days</item>
+		<item>2. Over half the days</item>
+		<item>3. Nearly every day</item>
+	</string-array>
+
+	<string name="spinner_gad4_name">4. Trouble relaxing</string>
+	<string-array name="spinner_gad4_array">
+		<item>None selected (touch to answer)</item>
+		<item>0. Not at all</item>
+		<item>1. Several days</item>
+		<item>2. Over half the days</item>
+		<item>3. Nearly every day</item>
+	</string-array>
+
+	<string name="spinner_gad5_name">5. Being so restless that its hard to sit still</string>
+	<string-array name="spinner_gad5_array">
+		<item>None selected (touch to answer)</item>
+		<item>0. Not at all</item>
+		<item>1. Several days</item>
+		<item>2. Over half the days</item>
+		<item>3. Nearly every day</item>
+	</string-array>
+
+	<string name="spinner_gad6_name">6. Becoming easily annoyed or irritable</string>
+	<string-array name="spinner_gad6_array">
+		<item>None selected (touch to answer)</item>
+		<item>0. Not at all</item>
+		<item>1. Several days</item>
+		<item>2. Over half the days</item>
+		<item>3. Nearly every day</item>
+	</string-array>
+
+	<string name="spinner_gad7_name">7. Feeling afraid as if something awful might happen</string>
+	<string-array name="spinner_gad7_array">
+		<item>None selected (touch to answer)</item>
+		<item>0. Not at all</item>
+		<item>1. Several days</item>
+		<item>2. Over half the days</item>
+		<item>3. Nearly every day</item>
 	</string-array>
 
 </resources>

@@ -200,6 +200,10 @@ public class ActivityQuestQIDS extends SherlockActivity implements OnSharedPrefe
             Intent questActivity = new Intent(getBaseContext(), ActivityQuestAltman.class);
             startActivity(questActivity);
             return true;
+        } else if (itemId == R.id.menu_quest_gad) {
+            Intent questActivity = new Intent(getBaseContext(), ActivityQuestGAD.class);
+            startActivity(questActivity);
+            return true;
 		} else if (itemId == R.id.menu_settings) {
 			Intent settingsActivity = new Intent(getBaseContext(), ActivitySettings.class);
 			startActivity(settingsActivity);
