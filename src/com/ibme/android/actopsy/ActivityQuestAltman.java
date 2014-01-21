@@ -63,11 +63,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ActivityQuestQIDS extends SherlockActivity implements OnSharedPreferenceChangeListener {
+public class ActivityQuestAltman extends SherlockActivity implements OnSharedPreferenceChangeListener {
 
-	private static final String TAG = "ActopsyQuest";
+	private static final String TAG = "ActopsyQuestAltman";
 
-	private ClassQuestQIDS mQuest;
+	private ClassQuestAltman mQuest;
 
 //	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	@Override
@@ -79,7 +79,7 @@ public class ActivityQuestQIDS extends SherlockActivity implements OnSharedPrefe
 //	                 .build());
 //		}
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.quest_qids);
+		setContentView(R.layout.quest_altman);
 
 		// Initialize preferences
 		PreferenceManager.setDefaultValues(this, R.layout.preferences, false);
@@ -91,50 +91,28 @@ public class ActivityQuestQIDS extends SherlockActivity implements OnSharedPrefe
 		this.startService(service);
 
 		long ts = System.currentTimeMillis();
-		mQuest = new ClassQuestQIDS(this);
+		mQuest = new ClassQuestAltman(this);
 		mQuest.init(ts);
 
 		final int spinners[] = {
-				R.id.spinnerQIDS1,
-				R.id.spinnerQIDS2,
-				R.id.spinnerQIDS3,
-				R.id.spinnerQIDS4,
-				R.id.spinnerQIDS5,
-				R.id.spinnerQIDS6,
-				R.id.spinnerQIDS7,
-				R.id.spinnerQIDS8,
-				R.id.spinnerQIDS9,
-				R.id.spinnerQIDS10,
-				R.id.spinnerQIDS11,
-				R.id.spinnerQIDS12,
-				R.id.spinnerQIDS13,
-				R.id.spinnerQIDS14,
-				R.id.spinnerQIDS15,
-				R.id.spinnerQIDS16
+				R.id.spinnerAltman1,
+				R.id.spinnerAltman2,
+				R.id.spinnerAltman3,
+				R.id.spinnerAltman4,
+				R.id.spinnerAltman5,
 			};
 
-		loadSpinner(R.id.spinnerQIDS1, R.array.spinner_qids1_array);
-		loadSpinner(R.id.spinnerQIDS2, R.array.spinner_qids2_array);
-		loadSpinner(R.id.spinnerQIDS3, R.array.spinner_qids3_array);
-		loadSpinner(R.id.spinnerQIDS4, R.array.spinner_qids4_array);
-		loadSpinner(R.id.spinnerQIDS5, R.array.spinner_qids5_array);
-		loadSpinner(R.id.spinnerQIDS6, R.array.spinner_qids6_array);
-		loadSpinner(R.id.spinnerQIDS7, R.array.spinner_qids7_array);
-		loadSpinner(R.id.spinnerQIDS8, R.array.spinner_qids8_array);
-		loadSpinner(R.id.spinnerQIDS9, R.array.spinner_qids9_array);
-		loadSpinner(R.id.spinnerQIDS10, R.array.spinner_qids10_array);
-		loadSpinner(R.id.spinnerQIDS11, R.array.spinner_qids11_array);
-		loadSpinner(R.id.spinnerQIDS12, R.array.spinner_qids12_array);
-		loadSpinner(R.id.spinnerQIDS13, R.array.spinner_qids13_array);
-		loadSpinner(R.id.spinnerQIDS14, R.array.spinner_qids14_array);
-		loadSpinner(R.id.spinnerQIDS15, R.array.spinner_qids15_array);
-		loadSpinner(R.id.spinnerQIDS16, R.array.spinner_qids16_array);
+		loadSpinner(R.id.spinnerAltman1, R.array.spinner_altman1_array);
+		loadSpinner(R.id.spinnerAltman2, R.array.spinner_altman2_array);
+		loadSpinner(R.id.spinnerAltman3, R.array.spinner_altman3_array);
+		loadSpinner(R.id.spinnerAltman4, R.array.spinner_altman4_array);
+		loadSpinner(R.id.spinnerAltman5, R.array.spinner_altman5_array);
 
 		// Handle submit button
         final Button submit = (Button) findViewById(R.id.buttonSubmit);
         submit.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	int vals[] = new int[16];
+            	int vals[] = new int[5];
             	boolean complete = true;
             	for (int i=0; i<spinners.length; i++) {
             		final Spinner spinner = (Spinner) findViewById(spinners[i]);
@@ -190,14 +168,14 @@ public class ActivityQuestQIDS extends SherlockActivity implements OnSharedPrefe
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int itemId = item.getItemId();
-		if (itemId == R.id.menu_quest_qids) {
+		if (itemId == R.id.menu_quest_altman) {
 			return super.onOptionsItemSelected(item);
 		} else if (itemId == R.id.menu_profile) {
 			Intent profileActivity = new Intent(getBaseContext(), ActivityProfile.class);
 			startActivity(profileActivity);
 			return true;
-        } else if (itemId == R.id.menu_quest_altman) {
-            Intent questActivity = new Intent(getBaseContext(), ActivityQuestAltman.class);
+        } else if (itemId == R.id.menu_quest_qids) {
+            Intent questActivity = new Intent(getBaseContext(), ActivityQuestQIDS.class);
             startActivity(questActivity);
             return true;
 		} else if (itemId == R.id.menu_settings) {

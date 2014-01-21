@@ -1,0 +1,105 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayoutQuest"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    tools:context="com.ibme.android.actopsy.Actopsy" >
+
+    <ScrollView
+        android:id="@+id/scrollViewMain"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:fillViewport="true" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/title_activity_quest_altman"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <TextView
+                android:id="@+id/textViewAltman1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/spinner_altman1_name"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+            <Spinner
+                android:id="@+id/spinnerAltman1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dialog" 
+                android:prompt="@string/spinner_altman1_name" />
+
+            <TextView
+                android:id="@+id/textViewAltman2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/spinner_altman2_name"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+            <Spinner
+                android:id="@+id/spinnerAltman2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dialog" 
+                android:prompt="@string/spinner_altman2_name" />
+
+            <TextView
+                android:id="@+id/textViewAltman3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/spinner_altman3_name"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+            <Spinner
+                android:id="@+id/spinnerAltman3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dialog" 
+                android:prompt="@string/spinner_altman3_name" />
+
+            <TextView
+                android:id="@+id/textViewAltman4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/spinner_altman4_name"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+            <Spinner
+                android:id="@+id/spinnerAltman4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dialog" 
+                android:prompt="@string/spinner_altman4_name" />
+
+            <TextView
+                android:id="@+id/textViewAltman5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/spinner_altman5_name"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+            <Spinner
+                android:id="@+id/spinnerAltman5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dialog" 
+                android:prompt="@string/spinner_altman5_name" />
+
+            <Button
+                android:id="@+id/buttonSubmit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:layout_marginTop="10dp"
+                android:text="Submit" />
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
