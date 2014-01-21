@@ -165,6 +165,10 @@ public class ActivitySettings extends PreferenceActivity implements OnSharedPref
 			Intent mainActivity = new Intent(getBaseContext(), ActivityProfile.class);
 			startActivity(mainActivity);
 			return true;
+        } else if (itemId == R.id.menu_quest_qids) {
+            Intent questActivity = new Intent(getBaseContext(), ActivityQuestQIDS.class);
+            startActivity(questActivity);
+            return true;
 		} else if (itemId == R.id.menu_settings) {
 			return super.onOptionsItemSelected(item);
 		} else {

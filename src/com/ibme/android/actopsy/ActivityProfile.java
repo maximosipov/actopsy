@@ -105,6 +105,10 @@ public class ActivityProfile extends SherlockActivity implements OnSharedPrefere
 		int itemId = item.getItemId();
 		if (itemId == R.id.menu_profile) {
 			return super.onOptionsItemSelected(item);
+        } else if (itemId == R.id.menu_quest_qids) {
+            Intent questActivity = new Intent(getBaseContext(), ActivityQuestQIDS.class);
+            startActivity(questActivity);
+            return true;
 		} else if (itemId == R.id.menu_settings) {
 			Intent settingsActivity = new Intent(getBaseContext(), ActivitySettings.class);
 			startActivity(settingsActivity);
