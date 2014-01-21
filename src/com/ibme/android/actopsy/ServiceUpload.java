@@ -91,9 +91,12 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 
 		// android.os.Debug.waitForDebugger();
 
-		long ts = System.currentTimeMillis();
-
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		if (!prefs.getBoolean("agreeOnTerms", false)) {
+			stopSelf();
+		}
+
+		long ts = System.currentTimeMillis();
 		int localStorage = Integer.valueOf(prefs.getString("editLocalStorage", "10")); 
 		mDeleteAge = localStorage*ClassConsts.MILLIDAY;
 		mUserID = prefs.getString("editUserID", "");
