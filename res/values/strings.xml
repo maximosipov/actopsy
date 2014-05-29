@@ -47,6 +47,12 @@
     <string name="pref_tc_pass_name">True Colours password</string>
     <string name="pref_tc_pass_summary">Please enter your True Colours password, if you would like to export your activity profile there</string>
 
+    <string name="pref_a_id_name">Actopsy user name</string>
+    <string name="pref_a_id_summary">Please enter your Actopsy user name</string>
+
+	<string name="pref_a_pass_name">Actopsy password</string>
+    <string name="pref_a_pass_summary">Please enter your Actopsy password</string>
+
     <string name="pref_usage_title">Phone usage</string>
     <string name="pref_usage_summary">What is your typical mobile phone usage pattern?</string>
 
@@ -67,6 +73,12 @@
 
     <string name="pref_server_tc_name">True Colours server</string>
     <string name="pref_server_tc_summary">Clinical server URL for activity data (NHS)</string>
+
+    <string name="pref_server_actopsy_name">Actopsy server</string>
+    <string name="pref_server_actopsy_summary">Actopsy server URL</string>
+
+    <string name="pref_port_actopsy_name">Actopsy port</string>
+    <string name="pref_port_actopsy_summary">Actopsy server port</string>
 
     <color name="white">#ffffffff</color>
     <color name="black">#ff000000</color>

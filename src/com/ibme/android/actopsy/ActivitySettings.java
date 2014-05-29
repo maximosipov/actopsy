@@ -81,6 +81,12 @@ public class ActivitySettings extends PreferenceActivity implements OnSharedPref
 		pref = findPreference("editServerTC");
 		pref.setSummary(((EditTextPreference)pref).getText());
 
+		pref = findPreference("editServerActopsy");
+		pref.setSummary(((EditTextPreference)pref).getText());
+
+		pref = findPreference("editPortActopsy");
+		pref.setSummary(((EditTextPreference)pref).getText());
+
 		// may increase data amount by 20x, so disable it for now
 		pref = findPreference("listSamplingRate");
 		pref.setSummary(((ListPreference)pref).getEntry());

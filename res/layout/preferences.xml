@@ -61,7 +61,22 @@
             android:key="editUserPassTC"
             android:summary="@string/pref_tc_pass_summary"
             android:title="@string/pref_tc_pass_name" />
-	</PreferenceCategory>
+
+        <EditTextPreference
+            android:name="@string/pref_a_id_name"
+            android:defaultValue=""
+            android:key="editActopsyID"
+            android:summary="@string/pref_a_id_summary"
+            android:title="@string/pref_a_id_name" />
+
+        <EditTextPreference
+            android:name="@string/pref_a_pass_name"
+            android:defaultValue=""
+            android:key="editActopsyPass"
+            android:summary="@string/pref_a_pass_summary"
+            android:title="@string/pref_a_pass_name" />
+
+    </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_personal" >
 
@@ -135,6 +150,20 @@
             android:key="editServerTC"
             android:summary="@string/pref_server_tc_summary"
             android:title="@string/pref_server_tc_name" />
-    </PreferenceCategory>
+
+        <EditTextPreference
+            android:name="@string/pref_server_actopsy_name"
+            android:defaultValue="http://db.actopsy.com/db/"
+            android:key="editServerActopsy"
+            android:summary="@string/pref_server_actopsy_summary"
+            android:title="@string/pref_server_actopsy_name" />
+        
+        <EditTextPreference
+            android:name="@string/pref_port_actopsy_name"
+            android:defaultValue="8086"
+            android:key="editPortActopsy"
+            android:summary="@string/pref_port_actopsy_summary"
+            android:title="@string/pref_port_actopsy_name" />
+	</PreferenceCategory>
 
 </PreferenceScreen>

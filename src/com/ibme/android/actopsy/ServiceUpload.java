@@ -42,6 +42,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import android.app.AlarmManager;
@@ -74,7 +75,6 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 
 	private long mDeleteAge; // in milliseconds
 	private String mUserID;
-	private String mUserPass;
 	private boolean mUpload;
 	private boolean mUploadDisabled;
 
@@ -100,7 +100,6 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 		int localStorage = Integer.valueOf(prefs.getString("editLocalStorage", "10")); 
 		mDeleteAge = localStorage*ClassConsts.MILLIDAY;
 		mUserID = prefs.getString("editUserID", "");
-		mUserPass = prefs.getString("editUserPass", "");
 		mUpload = prefs.getBoolean("checkboxShare", false);
 		mUploadDisabled = false;
 
@@ -186,6 +185,12 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 							new TaskUploaderTC(context).execute(files[i]);
 						}
 					}
+					files = getFiles(".*actopsy$");
+					if (files != null) {
+						for (int i = 0; i < files.length; i++) {
+							new TaskUploaderTC(context).execute(files[i]);
+						}
+					}
 				} else {
 					new ClassEvents(TAG, "INFO", "Upload off");
 				}
@@ -232,8 +237,10 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 					File root = Environment.getExternalStorageDirectory();
 					File folder = new File(root, ClassConsts.FILES_ROOT);
 					File dst = new File(folder, files[i].getName());
+					File adst = new File(folder, files[i].getName() + ".actopsy");
 					ArrayList<ClassProfileAccelerometry.Values> ivals = new ArrayList<ClassProfileAccelerometry.Values>();
 					ArrayList<TaskUploaderTC.Values> ovals = new ArrayList<TaskUploaderTC.Values>();
+					ArrayList<TaskUploaderActopsy.Values> avals = new ArrayList<TaskUploaderActopsy.Values>();
 					String tcid = mUserID.substring(2);
 					try {
 						// Read
@@ -242,9 +249,10 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 						// Convert
 						for (ClassProfileAccelerometry.Values v : ivals) {
 							ovals.add(new TaskUploaderTC.Values(tcid, v.t, v.l));
+							avals.add(new TaskUploaderActopsy.Values(v.t, v.l));
 						}
 
-						// Write
+						// tc
 						FileOutputStream ostream = new FileOutputStream(dst);
 						Gson gson = new Gson();
 						JsonWriter writer = new JsonWriter(new OutputStreamWriter(ostream, "UTF-8"));
@@ -253,6 +261,28 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 						for (TaskUploaderTC.Values v : ovals) {
 							gson.toJson(v, TaskUploaderTC.Values.class, writer);
 						}
+						writer.endArray();
+						writer.close();
+						/* actopsy */
+						ostream = new FileOutputStream(adst);
+						gson = new Gson();
+						writer = new JsonWriter(new OutputStreamWriter(ostream, "UTF-8"));
+						writer.setIndent(" ");
+						writer.beginArray();
+						writer.beginObject();
+						writer.name("name");
+						writer.value("activity");
+						writer.name("columns");
+						writer.beginArray();
+						writer.value("acc");
+						writer.endArray();
+						writer.beginArray();
+						writer.beginArray();
+						for (TaskUploaderTC.Values v : ovals) {
+							gson.toJson(v, TaskUploaderTC.Values.class, writer);
+						}
+						writer.endArray();
+						writer.endArray();
 						writer.endArray();
 						writer.close();
 					} catch (IOException e) {
@@ -308,8 +338,6 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 			}
 		} else if (key.equals("editUserID")) {
 			mUserID = sharedPreferences.getString("editUserID", "");
-		} else if (key.equals("editUserPass")) {
-			mUserPass = sharedPreferences.getString("editUserPass", "");
 		} else if (key.equals("checkboxShare")) {
 			mUpload = sharedPreferences.getBoolean("checkboxShare", false);
 		}

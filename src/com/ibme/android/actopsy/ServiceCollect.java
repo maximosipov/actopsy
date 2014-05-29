@@ -143,12 +143,14 @@ public class ServiceCollect extends Service implements
 		new ClassEvents(TAG, "INFO", "AccelerometerType: " + mSensorAccelerometer.getName());
 		new ClassEvents(TAG, "INFO", "AccelerometerMax: " + mSensorAccelerometer.getMaximumRange());
 		new ClassEvents(TAG, "INFO", "AccelerometerResolution: " + mSensorAccelerometer.getResolution());
-		mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-		new ClassEvents(TAG, "INFO", "LightType: " + mSensorLight.getName());
-		new ClassEvents(TAG, "INFO", "LightMax: " + mSensorLight.getMaximumRange());
-		new ClassEvents(TAG, "INFO", "LightResolution: " + mSensorLight.getResolution());
 		mSensorManager.registerListener(this, mSensorAccelerometer, sdelay);
-		mSensorManager.registerListener(this, mSensorLight, sdelay);
+		mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+		if (mSensorLight != null) {
+			new ClassEvents(TAG, "INFO", "LightType: " + mSensorLight.getName());
+			new ClassEvents(TAG, "INFO", "LightMax: " + mSensorLight.getMaximumRange());
+			new ClassEvents(TAG, "INFO", "LightResolution: " + mSensorLight.getResolution());
+			mSensorManager.registerListener(this, mSensorLight, sdelay);
+		}
 
 		if (loc) {
 			mLocation = new ClassLocation(this);
@@ -273,7 +275,9 @@ public class ServiceCollect extends Service implements
 			mSensorManager.unregisterListener(this);
 			mSensorManager.unregisterListener(this);
 			mSensorManager.registerListener(this, mSensorAccelerometer, Integer.valueOf(sdelay));
-			mSensorManager.registerListener(this, mSensorLight, Integer.valueOf(sdelay));
+			if (mSensorLight != null) {
+				mSensorManager.registerListener(this, mSensorLight, Integer.valueOf(sdelay));
+			}
 		} else if (key.equals("checkboxLocation")) {
 			boolean loc = prefs.getBoolean("checkboxLocation", false);
 			if (loc) {
