@@ -35,6 +35,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -188,7 +189,7 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 					files = getFiles(".*actopsy$");
 					if (files != null) {
 						for (int i = 0; i < files.length; i++) {
-							new TaskUploaderTC(context).execute(files[i]);
+							new TaskUploaderActopsy(context).execute(files[i]);
 						}
 					}
 				} else {
@@ -263,29 +264,38 @@ public class ServiceUpload extends Service implements OnSharedPreferenceChangeLi
 						}
 						writer.endArray();
 						writer.close();
+						ostream.close();
+						new ClassEvents(TAG, "INFO", "Created " + dst.getAbsolutePath());
+
 						/* actopsy */
 						ostream = new FileOutputStream(adst);
-						gson = new Gson();
 						writer = new JsonWriter(new OutputStreamWriter(ostream, "UTF-8"));
 						writer.setIndent(" ");
-						writer.beginArray();
-						writer.beginObject();
-						writer.name("name");
-						writer.value("activity");
-						writer.name("columns");
-						writer.beginArray();
-						writer.value("acc");
-						writer.endArray();
-						writer.beginArray();
-						writer.beginArray();
-						for (TaskUploaderTC.Values v : ovals) {
-							gson.toJson(v, TaskUploaderTC.Values.class, writer);
-						}
-						writer.endArray();
-						writer.endArray();
-						writer.endArray();
+						writer.beginArray();							//[
+						writer.beginObject();							//	{
+						writer.name("name");							//		"name":
+						writer.value("activity");						//			"activity",
+						writer.name("columns");							//		"columns":
+						writer.beginArray();							//			[
+						writer.value("time");							//				"time",
+						writer.value("acc");							//				"acc"
+						writer.endArray();								//			],
+						writer.name("points");							//		"points":
+						writer.beginArray();							//			[
+						for (TaskUploaderActopsy.Values v : avals) {	//
+							writer.beginArray();						//				[
+							writer.value(v.time);						//					time,
+							writer.value(v.acc);						//					acc
+							writer.endArray();							//				]
+						}												//
+						writer.endArray();								//			]
+						writer.endObject();								//	}
+						writer.endArray();								//]
+						writer.flush();
 						writer.close();
-					} catch (IOException e) {
+						ostream.close();
+						new ClassEvents(TAG, "INFO", "Created " + adst.getAbsolutePath());
+					} catch (Exception e) {
 						new ClassEvents(TAG, "ERROR", "Couldn't copy " + dst.getAbsolutePath());
 					}
 				}

@@ -114,7 +114,7 @@ public class TaskUploaderActopsy extends AsyncTask<File, Void, Void> {
 				jvals = sb.toString();
 
 			    DefaultHttpClient httpclient = new DefaultHttpClient();
-				URL url = new URL(mActopsyServer + mActopsyID + "/series?u=" + mActopsyID + "&p=" + mActopsyPass);
+				URL url = new URL(mActopsyServer + "/api/db/" + mActopsyID + "/series?u=" + mActopsyID + "&p=" + mActopsyPass);
 			    HttpPost httppost = new HttpPost(url.toString());
 			    httppost.setEntity(new StringEntity(jvals));
 			    httppost.setHeader("Accept", "application/json");
